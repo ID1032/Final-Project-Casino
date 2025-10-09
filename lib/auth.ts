@@ -1,6 +1,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 
-export const handleSignIn = () => signIn('google', { redirect: false });
+export const handleSignIn = (callbackUrl?: string) =>
+  signIn('google', { callbackUrl, redirect: true });
 export const handleSignOut = () => signOut();
 
 // Client-side authentication utilities

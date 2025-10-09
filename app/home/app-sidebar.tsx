@@ -6,8 +6,8 @@ import Image from 'next/image';
 
 import { Diamond, Dice3, LayoutGrid, Target } from 'lucide-react';
 
-import { NavMain } from '@/components/nav-main';
-import { LanguageSelector, Language } from '@/components/language-selector';
+import { NavMain } from '@/app/home/nav-main';
+import { LanguageSelector, Language } from '@/app/home/language-selector';
 import {
   Sidebar,
   SidebarContent,

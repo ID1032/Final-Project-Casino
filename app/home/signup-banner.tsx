@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import banner from './banner.jpeg';
+import banner from './assets/banner.jpeg';
 import Link from 'next/link';
 
 export function SignupBanner() {

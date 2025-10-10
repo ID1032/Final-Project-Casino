@@ -3,29 +3,32 @@
 import { Coins, Gamepad2 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { useMenu } from '@/contexts/menu-context';
+import { useMenu } from '@/app/home/contexts/menu-context';
+import Link from 'next/link';
 
 // Import SVG images
-import FishPrawnCrabSvg from './fish-pawn-crab.svg';
-import HiLoSvg from './hi-lo.svg';
-import MahjongSvg from './mohjong.svg';
-import PaiGowSvg from './pai-gow.svg';
-import FanTanSvg from './fan-tan.svg';
-import PachinkoSvg from './pachinko.svg';
-import GoStopSvg from './go-stop.svg';
+import FishPrawnCrabSvg from './assets/fish-pawn-crab.svg';
+import HiLoSvg from './assets/hi-lo.svg';
+import MahjongSvg from './assets/mohjong.svg';
+import PaiGowSvg from './assets/pai-gow.svg';
+import FanTanSvg from './assets/fan-tan.svg';
+import PachinkoSvg from './assets/pachinko.svg';
+import GoStopSvg from './assets/go-stop.svg';
 
 const games = [
   {
     id: 1,
     name: 'Fish Prawn Crab',
-    type: 'CARD',
+    type: 'RANDOM',
     backgroundImage: FishPrawnCrabSvg,
+    slug: 'fish-prawn-crab',
   },
   {
     id: 2,
     name: 'Hi-Lo',
-    type: 'CARD',
+    type: 'RANDOM',
     backgroundImage: HiLoSvg,
+    slug: 'hilo',
   },
   {
     id: 3,
@@ -33,31 +36,36 @@ const games = [
     type: 'CARD',
     backgroundImage: MahjongSvg,
     description: 'Classic tile matching game',
+    slug: 'mahjong',
   },
   {
     id: 4,
     name: 'Pai Gow',
-    type: 'CARD',
+    type: 'RANDOM',
     backgroundImage: PaiGowSvg,
     icon: Coins,
+    slug: 'pai-gow',
   },
   {
     id: 5,
     name: 'Fan Tan',
     type: 'CARD',
     backgroundImage: FanTanSvg,
+    slug: 'fan-tan',
   },
   {
     id: 6,
     name: 'Pachinko',
     type: 'SLOT',
     backgroundImage: PachinkoSvg,
+    slug: 'pachinko',
   },
   {
     id: 7,
     name: 'Go-Stop',
     type: 'CARD',
     backgroundImage: GoStopSvg,
+    slug: 'go-stop',
   },
 ];
 
@@ -67,10 +75,6 @@ export function SectionGames() {
   const filteredGames = (() => {
     if (selectedMenu === 'MAIN') {
       return games;
-    } else if (selectedMenu === 'RANDOM') {
-      // Shuffle array and take first 3 games
-      const shuffled = [...games].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, 3);
     } else {
       return games.filter(game => game.type === selectedMenu);
     }
@@ -112,46 +116,51 @@ export function SectionGames() {
           <div className='grid grid-cols-1 gap-[19px] sm:grid-cols-2 lg:grid-cols-3'>
             {filteredGames.slice(0, 3).map((game, index) => {
               return (
-                <Card
+                <Link
                   key={`${game.id}-${selectedMenu}`}
-                  className='group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg game-card'
-                  style={{
-                    animationDelay: `${index * 80}ms`,
-                  }}
+                  href={`/games/${game.slug}`}
                 >
-                  <CardContent
-                    className='p-8 text-white rounded-lg h-48 flex flex-col justify-between relative overflow-hidden'
+                  <Card
+                    className='group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg game-card'
                     style={{
-                      backgroundImage: `url(${game.backgroundImage.src})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
+                      animationDelay: `${index * 80}ms`,
                     }}
                   >
-                    {/* Dark overlay for better text readability */}
-                    <div className='absolute inset-0 rounded-lg'></div>
-                    <div className='relative z-10 flex flex-col justify-end h-full w-32'>
-                      <div className='flex items-end justify-start'>
-                        <div className='space-y-2'>
-                          <h3 className='font-semibold text-3xl leading-tight'>
-                            {game.name}
-                          </h3>
+                    <CardContent
+                      className='p-8 text-white rounded-lg h-48 flex flex-col justify-between relative overflow-hidden'
+                      style={{
+                        backgroundImage: `url(${(game as any).backgroundImage.src})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                      }}
+                    >
+                      {/* Dark overlay for better text readability */}
+                      <div className='absolute inset-0 rounded-lg'></div>
+                      <div className='relative z-10 flex flex-col justify-end h-full w-32'>
+                        <div className='flex items-end justify-start'>
+                          <div className='space-y-2'>
+                            <h3 className='font-semibold text-3xl leading-tight'>
+                              {game.name}
+                            </h3>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </div>
 
-          {/* Second Row - 4 cards (hidden for RANDOM mode) */}
-          {selectedMenu !== 'RANDOM' && (
-            <div className='grid grid-cols-1 gap-[19px] sm:grid-cols-2 lg:grid-cols-4'>
-              {filteredGames.slice(3, games.length).map((game, index) => {
-                return (
+          <div className='grid grid-cols-1 gap-[19px] sm:grid-cols-2 lg:grid-cols-4'>
+            {filteredGames.slice(3, games.length).map((game, index) => {
+              return (
+                <Link
+                  key={`${game.id}-${selectedMenu}`}
+                  href={`/games/${game.slug}`}
+                >
                   <Card
-                    key={`${game.id}-${selectedMenu}`}
                     className='group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg game-card'
                     style={{
                       animationDelay: `${(index + 3) * 80}ms`,
@@ -160,7 +169,7 @@ export function SectionGames() {
                     <CardContent
                       className='p-6 text-white rounded-lg h-36 flex flex-col justify-between relative overflow-hidden'
                       style={{
-                        backgroundImage: `url(${game.backgroundImage.src})`,
+                        backgroundImage: `url(${(game as any).backgroundImage.src})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
@@ -179,10 +188,10 @@ export function SectionGames() {
                       </div>
                     </CardContent>
                   </Card>
-                );
-              })}
-            </div>
-          )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </>

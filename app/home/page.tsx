@@ -3,7 +3,7 @@ import { SectionGames } from '@/app/home/section-games';
 import { SiteHeader } from '@/app/home/site-header';
 import { SignupBanner } from '@/app/home/signup-banner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { MenuProvider } from '@/contexts/menu-context';
+import { MenuProvider } from '@/app/home/contexts/menu-context';
 
 export default function Page() {
   return (

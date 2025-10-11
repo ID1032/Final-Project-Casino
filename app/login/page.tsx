@@ -1,29 +1,25 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { handleSignIn } from '@/lib/auth';
+import { useSearchParams } from 'next/navigation';
 
-interface LoginModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+export default function LoginPage() {
+  const [activeTab, setActiveTab] = useState<'register' | 'login'>('login');
+  const searchParams = useSearchParams();
+  const callbackUrl = useMemo(
+    () => searchParams.get('callbackUrl') ?? '/home',
+    [searchParams]
+  );
 
-export function LoginModal({ open, onOpenChange }: LoginModalProps) {
-  const [activeTab, setActiveTab] = useState<'register' | 'login'>('register');
   const handleGoogleSignIn = () => {
-    handleSignIn();
+    handleSignIn(callbackUrl);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='w-[880px] bg-gradient-to-b from-[#4C3519] to-[#C29467] border-2 border-[#DA7814] p-0'>
+    <div className='min-h-[calc(100vh-64px)] w-full flex items-center justify-center p-4'>
+      <div className='w-full max-w-[880px] bg-gradient-to-b from-[#4C3519] to-[#C29467] border-2 border-[#DA7814] rounded-md overflow-hidden'>
         <div className=''>
           <div className='grid grid-cols-2 w-full py-[24px]'>
             <button
@@ -67,11 +63,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
         {activeTab === 'register' && (
           <div className='py-[56px] px-[80px]'>
-            <DialogHeader className='text-center mb-6'>
-              <DialogTitle className='text-white text-[24px] text-center font-bold'>
+            <div className='text-center mb-6'>
+              <h1 className='text-white text-[24px] text-center font-bold'>
                 CPE888, Welcome to Casino No.1 in CPE
-              </DialogTitle>
-            </DialogHeader>
+              </h1>
+            </div>
 
             <div className='space-y-4 flex flex-col items-center'>
               <Button
@@ -117,11 +113,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
         {activeTab === 'login' && (
           <div className='py-[56px] px-[80px]'>
-            <DialogHeader className='text-center mb-6'>
-              <DialogTitle className='text-white text-[24px] text-center font-bold'>
+            <div className='text-center mb-6'>
+              <h1 className='text-white text-[24px] text-center font-bold'>
                 CPE888, Welcome back!
-              </DialogTitle>
-            </DialogHeader>
+              </h1>
+            </div>
 
             <div className='space-y-4 flex flex-col items-center'>
               <Button
@@ -137,7 +133,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                 >
                   <path
                     fill='#FFC107'
-                    d='M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917'
+                    d='M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691'
                   />
                   <path
                     fill='#FF3D00'
@@ -163,7 +159,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

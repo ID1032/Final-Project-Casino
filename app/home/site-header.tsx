@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Search, Settings, User } from 'lucide-react';
-import { LoginModal } from '@/components/login-modal';
 import { useAuth } from '@/lib/auth';
 import { signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,7 +16,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function SiteHeader() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { user, isAuthenticated, isLoading } = useAuth();
 
   return (
@@ -118,14 +116,14 @@ export function SiteHeader() {
           ) : (
             // Show login/signup buttons when not authenticated
             <>
-              <Button
-                variant='outline'
-                className='bg-[#8B4513] border-[#8B4513] text-white hover:bg-[#A0522D] rounded-lg px-4 py-2'
-                onClick={() => setIsLoginModalOpen(true)}
-                data-id='login-button'
-              >
-                Log in
-              </Button>
+              <Link href='/login'>
+                <Button
+                  variant='outline'
+                  className='bg-[#8B4513] border-[#8B4513] text-white hover:bg-[#A0522D] rounded-lg px-4 py-2'
+                >
+                  Log in
+                </Button>
+              </Link>
               <Button
                 variant='ghost'
                 size='icon'
@@ -137,8 +135,6 @@ export function SiteHeader() {
           )}
         </div>
       </header>
-
-      <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />
     </>
   );
 }

@@ -6,14 +6,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Search, Settings, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 export function SiteHeader() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -53,58 +46,18 @@ export function SiteHeader() {
               </Button>
             </div>
           ) : isAuthenticated ? (
-            // Show user avatar and dropdown when logged in
+            // Show user avatar (no dropdown) when logged in; actions moved to sidebar
             <div className='flex items-center gap-3'>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    className='relative h-8 w-8 rounded-full hover:bg-[#A0522D]'
-                  >
-                    <Avatar className='h-8 w-8'>
-                      <AvatarImage
-                        src={user?.image || ''}
-                        alt={user?.name || ''}
-                      />
-                      <AvatarFallback className='bg-[#8B4513] text-white'>
-                        {user?.name?.charAt(0)?.toUpperCase() || (
-                          <User className='h-4 w-4' />
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className='w-56 bg-black border-[#8B4513]'
-                  align='end'
-                  forceMount
-                >
-                  <div className='flex items-center justify-start gap-2 p-2'>
-                    <div className='flex flex-col space-y-1 leading-none'>
-                      {user?.name && (
-                        <p className='font-medium text-white'>{user.name}</p>
-                      )}
-                      {user?.email && (
-                        <p className='w-[200px] truncate text-sm text-gray-400'>
-                          {user.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <DropdownMenuItem className='text-white hover:bg-[#A0522D] cursor-pointer'>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className='text-white hover:bg-[#A0522D] cursor-pointer'>
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className='text-white hover:bg-[#A0522D] cursor-pointer'
-                    onClick={() => signOut()}
-                  >
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className='relative h-8 w-8 rounded-full'>
+                <Avatar className='h-8 w-8'>
+                  <AvatarImage src={user?.image || ''} alt={user?.name || ''} />
+                  <AvatarFallback className='bg-[#8B4513] text-white'>
+                    {user?.name?.charAt(0)?.toUpperCase() || (
+                      <User className='h-4 w-4' />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
               <Button
                 variant='ghost'
                 size='icon'

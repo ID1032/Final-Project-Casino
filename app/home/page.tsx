@@ -1,6 +1,6 @@
-import { AppSidebar } from '@/app/home/app-sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
 import { SectionGames } from '@/app/home/section-games';
-import { SiteHeader } from '@/app/home/site-header';
+import { SiteHeader } from '@/components/site-header';
 import { SignupBanner } from '@/app/home/signup-banner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { MenuProvider } from '@/app/home/contexts/menu-context';

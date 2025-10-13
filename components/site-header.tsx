@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Search, Settings, User } from 'lucide-react';
+import { Search, Settings, User, Coins, PlusCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -48,6 +48,21 @@ export function SiteHeader() {
           ) : isAuthenticated ? (
             // Show user avatar (no dropdown) when logged in; actions moved to sidebar
             <div className='flex items-center gap-3'>
+              {/* Coin balance pill */}
+              <Button
+                variant='outline'
+                className='bg-[#4C3519] border-[#67533C] text-white rounded-lg px-4 py-2 h-10 flex items-center gap-2'
+              >
+                <Coins className='h-4 w-4 text-[#F5A524]' />
+                <span className='font-semibold tracking-wider'>888,888</span>
+              </Button>
+              {/* Deposit button */}
+              <Link href='/deposit'>
+                <Button className='bg-[#DA7814] hover:brightness-110 text-white rounded-lg px-5 py-2 h-10 flex items-center gap-2'>
+                  <PlusCircle className='h-5 w-5 opacity-90' />
+                  <span className='font-semibold'>Deposit</span>
+                </Button>
+              </Link>
               <div className='relative h-8 w-8 rounded-full'>
                 <Avatar className='h-8 w-8'>
                   <AvatarImage src={user?.image || ''} alt={user?.name || ''} />

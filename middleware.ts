@@ -10,10 +10,34 @@ export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     if (!token) {
-      const url = new URL('/login', req.url);
-      // Preserve intended destination for post-login redirect
-      url.searchParams.set('callbackUrl', pathname + search);
-      return NextResponse.redirect(url);
+      const accepts = req.headers.get('accept') || '';
+      const secFetchDest = (
+        req.headers.get('sec-fetch-dest') || ''
+      ).toLowerCase();
+
+      // If this is a top-level navigation (HTML/document), redirect to login
+      const isDocumentNavigation =
+        req.method === 'GET' &&
+        (secFetchDest === 'document' || accepts.includes('text/html'));
+
+      const loginUrl = new URL('/login', req.url);
+      loginUrl.searchParams.set('callbackUrl', pathname + search);
+
+      if (isDocumentNavigation) {
+        return NextResponse.redirect(loginUrl);
+      }
+
+      // Otherwise, return 401 JSON for programmatic requests
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Unauthorized',
+          redirectTo: loginUrl.toString(),
+        }),
+        {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }
+      );
     }
   }
 

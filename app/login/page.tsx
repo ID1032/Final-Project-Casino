@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { handleSignIn } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/client';
 import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
@@ -12,9 +12,23 @@ export default function LoginPage() {
     () => searchParams.get('callbackUrl') ?? '/home',
     [searchParams]
   );
+  const supabase = useMemo(() => createClient(), []);
 
-  const handleGoogleSignIn = () => {
-    handleSignIn(callbackUrl);
+  const handleGoogleSignIn = async () => {
+    const redirectTo = `${window.location.origin}${callbackUrl}`;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+      },
+    });
+    if (error) {
+      console.error('Google sign-in error', error);
+      return;
+    }
+    if (data?.url) {
+      window.location.href = data.url;
+    }
   };
 
   return (

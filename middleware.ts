@@ -1,15 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { createServerClient } from '@supabase/ssr';
+import { updateSession } from './lib/supabase/middleware';
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
   // Protect all /games/* routes
   if (pathname.startsWith('/games')) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    // Build a Supabase server client from the incoming request cookies
+    let res = NextResponse.next({ request: req });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return req.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              req.cookies.set(name, value)
+            );
+            res = NextResponse.next({ request: req });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              res.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
 
-    if (!token) {
+    const { data } = await supabase.auth.getSession();
+    const hasSession = Boolean(data?.session);
+
+    if (!hasSession) {
       const accepts = req.headers.get('accept') || '';
       const secFetchDest = (
         req.headers.get('sec-fetch-dest') || ''
@@ -41,7 +66,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return await updateSession(req);
 }
 
 export const config = {

@@ -5,11 +5,49 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Search, Settings, User, Coins, PlusCircle } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useEffect, useMemo, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function SiteHeader() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const supabase = useMemo(() => createClient(), []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [displayName, setDisplayName] = useState<string | undefined>(undefined);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      if (error) {
+        console.error('Error loading session', error);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+      const session = data.session;
+      const user = session?.user;
+      setIsAuthenticated(Boolean(session));
+      setDisplayName(
+        (user?.user_metadata?.name as string | undefined) ||
+          (user?.email as string | undefined)
+      );
+      setAvatarUrl(user?.user_metadata?.picture as string | undefined);
+      setIsLoading(false);
+    };
+
+    loadSession();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      loadSession();
+    });
+    return () => {
+      isMounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <>
@@ -65,9 +103,9 @@ export function SiteHeader() {
               </Link>
               <div className='relative h-8 w-8 rounded-full'>
                 <Avatar className='h-8 w-8'>
-                  <AvatarImage src={user?.image || ''} alt={user?.name || ''} />
+                  <AvatarImage src={avatarUrl || ''} alt={displayName || ''} />
                   <AvatarFallback className='bg-[#8B4513] text-white'>
-                    {user?.name?.charAt(0)?.toUpperCase() || (
+                    {displayName?.charAt(0)?.toUpperCase() || (
                       <User className='h-4 w-4' />
                     )}
                   </AvatarFallback>

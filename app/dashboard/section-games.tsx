@@ -1,6 +1,7 @@
 'use client';
 
 import { Coins, Gamepad2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { useMenu } from '@/contexts/menu-context';
@@ -63,6 +64,36 @@ const games = [
 
 export function SectionGames() {
   const { selectedMenu } = useMenu();
+  const router = useRouter();
+
+  const goToGame = (name: string) => {
+    // Map game names to routes
+    switch (name) {
+      case 'Fish Prawn Crab':
+        router.push('/games/fish-prawn-crab');
+        return;
+      case 'Hi-Lo':
+        router.push('/games/hi-lo');
+        return;
+      case 'Mahjong':
+        router.push('/games/mahjong');
+        return;
+      case 'Pai Gow':
+        router.push('/games/pai-gow');
+        return;
+      case 'Fan Tan':
+        router.push('/games/fan-tan');
+        return;
+      case 'Pachinko':
+        router.push('/games/pachinko');
+        return;
+      case 'Go-Stop':
+        router.push('/games/go-stop');
+        return;
+      default:
+        return;
+    }
+  }
 
   const filteredGames = (() => {
     if (selectedMenu === 'MAIN') {
@@ -118,6 +149,7 @@ export function SectionGames() {
                   style={{
                     animationDelay: `${index * 80}ms`,
                   }}
+                  onClick={() => goToGame(game.name)}
                 >
                   <CardContent
                     className='p-8 text-white rounded-lg h-48 flex flex-col justify-between relative overflow-hidden'
@@ -127,6 +159,7 @@ export function SectionGames() {
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat',
                     }}
+                      onClick={() => goToGame(game.name)}
                   >
                     {/* Dark overlay for better text readability */}
                     <div className='absolute inset-0 rounded-lg'></div>

@@ -1,6 +1,7 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import LotteryGrid from '@/app/lottery/grid'
 
 export default function LotteryPage() {
   return (
@@ -19,9 +20,9 @@ export default function LotteryPage() {
           <div className='@container/main flex flex-1 flex-col gap-2'>
             <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
               <div className='px-4 lg:px-6'>
-                <div className='rounded-xl border border-[#67533C] bg-[#1E1307] p-6 text-white'>
-                  <h1 className='text-2xl font-bold mb-2'>Lottery</h1>
-                  <p className='text-gray-300'>Lottery content coming soon.</p>
+                <h1 className='text-2xl font-bold mb-2'>Lottery</h1>
+                <div className='bg-gradient-to-b from-[#D2C7BD] to-[#e89c3f7d] border-4 border-[#FFC548e0]/88 p-6 rounded-lg w-full h-full'>
+                  <LotteryGrid />
                 </div>
               </div>
             </div>

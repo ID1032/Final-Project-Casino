@@ -2,35 +2,35 @@
 
 import * as React from 'react'
 
-type ResultItem = {
+type SummaryItem = {
   label: string
   points: number
 }
 
-interface ResultModalProps {
+interface SummaryModalProps {
   isOpen: boolean
   onClose: () => void
   onPlayAgain: () => void
   onExit: () => void
   title?: string
-  items: ResultItem[]
+  items: SummaryItem[]
 }
 
-export default function ResultModal({
+export default function SummaryModal({
   isOpen,
   onClose,
   onPlayAgain,
   onExit,
   title,
   items,
-}: ResultModalProps) {
+}: SummaryModalProps) {
   if (!isOpen) return null
 
   const total = React.useMemo(() => items.reduce((sum, i) => sum + i.points, 0), [items])
   const isWin = total >= 0
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50" role="dialog" aria-modal="true" aria-label="Round result">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50" role="dialog" aria-modal="true" aria-label="Round summary">
       <div className="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
         <div className="px-7 py-8 md:px-10 md:py-10">
           <h2 className="text-4xl md:text-5xl font-extrabold text-center tracking-tight">

@@ -1,7 +1,7 @@
 "use client";
 import {useMemo, useState} from 'react'
 import Modal from '@/components/ui/rules';
-import ResultModal from '@/components/ui/result'
+import SummaryModal from '@/components/ui/summary'
 import { useRouter } from 'next/navigation'
 import DiceResultModal from '@/components/ui/dice-result'
 
@@ -121,8 +121,8 @@ export default function FishPrawnCrabPage() {
       }}
     />
 
-    {/* Result modal */}
-    <ResultModal
+    {/* Summary modal */}
+    <SummaryModal
       isOpen={isResultOpen}
       onClose={() => setIsResultOpen(false)}
       onPlayAgain={() => {

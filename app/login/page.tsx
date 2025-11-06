@@ -120,7 +120,6 @@ export default function LoginPage() {
       return;
     }
     const submit = async () => {
-      // Use the Username field as email for signup
       const emailForSignup = registerEmail.trim();
 
       const redirectTo = `${window.location.origin}${callbackUrl}`;
@@ -136,7 +135,6 @@ export default function LoginPage() {
         },
       });
 
-      // If email confirmation is disabled or auto-confirmed, session will exist
       if (data.session) {
         window.location.href = callbackUrl;
         return;

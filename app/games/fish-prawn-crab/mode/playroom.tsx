@@ -3,27 +3,27 @@
 
 import { Card, CardContent } from '../../../../components/ui/card';
 import Calabash from '@/app/dashboard/Calabash.svg';
-import CalabashH from '@/app/dashboard/assets/Calabash.svg';
-import Crab from '@/app/dashboard/assets/Crab.svg';
-import CrabH from '@/app/dashboard/assets/Crab.svg';
-import Fish from '@/app/dashboard/assets/Fish.svg';
-import FishH from '@/app/dashboard/assets/FishH.svg';
-import Chicken from '@/app/dashboard/assets/Chicken.svg';
-import ChickenH from '@/app/dashboard/assets/ChickenH.svg';
-import Shrimp from '@/app/dashboard/assets/Shrimp.svg';
-import ShrimpH from '@/app/dashboard/assets/ShrimpH.svg';
-import Tiger from '@/app/dashboard/assets/Tiger.svg';
-import TigerH from '@/app/dashboard/assets/TigerH.svg';
+import CalabashH from '@/app/dashboard/Calabash.svg';
+import Crab from '@/app/dashboard/Crab.svg';
+import CrabH from '@/app/dashboard/Crab.svg';
+import Fish from '@/app/dashboard/Fish.svg';
+import FishH from '@/app/dashboard/FishH.svg';
+import Chicken from '@/app/dashboard/Chicken.svg';
+import ChickenH from '@/app/dashboard/ChickenH.svg';
+import Shrimp from '@/app/dashboard/Shrimp.svg';
+import ShrimpH from '@/app/dashboard/ShrimpH.svg';
+import Tiger from '@/app/dashboard/Tiger.svg';
+import TigerH from '@/app/dashboard/TigerH.svg';
 import ModalBet from './ModalBet';
 // import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import dashboard from '@/app/dashboard/assets/dashboard.svg';
-import Rule from '@/app/dashboard/assets/rulesFantan.svg';
+import Home from '@/app/dashboard/home.svg';
+import Rule from '@/app/dashboard/rulesFantan.svg';
 import Modal from '@/components/ui/rules';
 // import { useEffect } from 'react';
 import { useState, useEffect } from 'react';
-import Coin from '@/app/dashboard/assets/Coin.svg'; // หรือ coin.png ตามไฟล์ที่มี
+import Coin from '@/app/dashboard/Coin.svg'; // หรือ coin.png ตามไฟล์ที่มี
 
 interface Items {
   id: number;
@@ -97,10 +97,8 @@ export default function PlayRoom() {
   const items = [...itemsU, ...itemsB];
   const [bets, setBets] = useState<number[]>(() => Array(items.length).fill(0));
 
-  // 🟩 ใส่ตรงนี้ได้เลย
   useEffect(() => {
     console.log('📊 ค่าปัจจุบันของ bets:', bets);
-    // ดูแบบตารางอ่านง่ายขึ้น
     console.table(bets);
   }, [bets]);
 
@@ -129,11 +127,11 @@ export default function PlayRoom() {
       <Link
         href='/'
         className='absolute top-[1vw] left-[1vw] p-2 w-[4vw] h-[4vw] max-w-[50px] max-h-[50px]'
-        aria-label='Back dashboard'
+        aria-label='Back Home'
       >
         <Image
-          src={dashboard}
-          alt='dashboard'
+          src={Home}
+          alt='Home'
           fill
           className='cursor-pointer hover:scale-110 transition-transform duration-200'
         />

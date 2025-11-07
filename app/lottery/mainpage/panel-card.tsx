@@ -1,9 +1,12 @@
 'use client';
 
-import { LotteryItem } from '@/app/lottery/data';
+import { LotteryItem } from '@/app/lottery/mainpage/data';
+type Props = {
+  data: LotteryItem;
+};
 
-export default function LotteryPanel({ item }: { item: LotteryItem }) {
-  const isUnavailable = item == null || !item.available;
+export default function LotteryPanel({ data }: Props) {
+  const isUnavailable = data == null || !data.available;
 
   return (
     <div className='relative z-10 flex flex-col space-y-2 rounded-xl items-center mx-auto justify-center w-fit'>
@@ -58,7 +61,7 @@ export default function LotteryPanel({ item }: { item: LotteryItem }) {
           </div>
 
           <div className='relative rounded-xl p-6 justify-center bg-[#5d0000] border-4 border-[#ffffff]  grid grid-cols-3 sm:gap-6 mt-4 mb-4 ml-1 mr-1 w-full h-full'>
-            {item.numbers.map((num, idx) => (
+            {data.numbers.map((num, idx) => (
               <div
                 key={idx}
                 className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black  text-black text-center font-bold px-3 py-2 rounded text-base sm:text-lg md:text-xl w-full'
@@ -75,12 +78,12 @@ export default function LotteryPanel({ item }: { item: LotteryItem }) {
         <div
           className={`rounded-full px-4 py-2 text-white font-bold shadow-md
     ${
-      item.available > 0
+      data.available > 0
         ? 'bg-gradient-to-b from-[#FF0000A3] to-[#EE9F3D] hover:bg-white'
         : 'bg-gradient-to-b from-[#737373B2] to-[#FFFFFF] opacity-70 cursor-not-allowed'
     }`}
         >
-          {item.available > 0 ? `${item.available}/5 ` : `${item.available}/5 `}
+          {`${data.available}/5 `}
         </div>
       </button>
     </div>

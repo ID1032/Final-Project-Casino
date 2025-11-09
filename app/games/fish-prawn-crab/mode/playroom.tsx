@@ -15,15 +15,14 @@ import ShrimpH from '@/app/dashboard/ShrimpH.svg';
 import Tiger from '@/app/dashboard/Tiger.svg';
 import TigerH from '@/app/dashboard/TigerH.svg';
 import ModalBet from './ModalBet';
-// import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Home from '@/app/dashboard/home.svg';
 import Rule from '@/app/dashboard/rulesFantan.svg';
 import Modal from '@/components/ui/rules';
-// import { useEffect } from 'react';
 import { useState, useEffect } from 'react';
-import Coin from '@/app/dashboard/Coin.svg'; // หรือ coin.png ตามไฟล์ที่มี
+import Coin from '@/app/dashboard/Coin.svg'; 
+import { useRouter } from 'next/navigation';
 
 interface Items {
   id: number;
@@ -88,7 +87,9 @@ const itemsB: Items[] = [
   },
 ];
 
+
 const getSrc = (img: any) => (typeof img === 'string' ? img : (img?.src ?? ''));
+
 
 export default function PlayRoom() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
@@ -96,9 +97,10 @@ export default function PlayRoom() {
   const [selected, setSelected] = useState<any>(null);
   const items = [...itemsU, ...itemsB];
   const [bets, setBets] = useState<number[]>(() => Array(items.length).fill(0));
+  const router = useRouter();
 
   useEffect(() => {
-    console.log('📊 ค่าปัจจุบันของ bets:', bets);
+    console.log('Current bets:', bets);
     console.table(bets);
   }, [bets]);
 
@@ -115,12 +117,23 @@ export default function PlayRoom() {
     setBets(prev => {
       const next = [...prev];
       next[idx] = value;
-      console.log('🎯 อัปเดตค่าเดิมพันใหม่:', next);
       return next;
     });
 
     setOpen(false);
   };
+
+    const handleConfirmAll = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+
+      const payload = items.map(
+        it => bets[items.findIndex(i => i.id === it.id)] || 0
+      );
+
+      router.push(
+        `/games/fish-prawn-crab/summary?bets=${encodeURIComponent(JSON.stringify(payload))}`
+      );
+    };
 
   return (
     <main className='relative min-h-screen flex items-center justify-center bg-[#2D1C0C]'>
@@ -142,7 +155,7 @@ export default function PlayRoom() {
             <Card
               key={it.id}
               onClick={() => handleSelect(it)}
-              className='items-card group relative w-[25vw] h-[25vw] max-w-[400px] max-h-[400px] cursor-pointer overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105 shadow-lg'
+              className='items-card group relative w-[22vw] h-[22vw] max-w-[400px] max-h-[400px] cursor-pointer overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105 shadow-lg'
               style={{
                 animationDelay: `${index * 150}ms`,
                 backgroundImage: `url(${getSrc(it.backgroundImage)})`,
@@ -160,15 +173,13 @@ export default function PlayRoom() {
                 />
                 {bets[items.findIndex(i => i.id === it.id)] > 0 && (
                   <span className='absolute bottom-3 right-3 flex items-center gap-1 bg-black text-white text-sm px-2 py-1 rounded-full'>
-                    {/* รูปเหรียญ */}
                     <Image
-                      src={Coin} // หรือ '@/app/dashboard/assets/coin.svg' ตาม path ที่คุณใช้
+                      src={Coin}
                       alt='coin'
                       width={18}
                       height={18}
                       className='inline-block'
                     />
-                    {/* จำนวนเงิน */}
                     {bets[items.findIndex(i => i.id === it.id)]}
                   </span>
                 )}
@@ -181,7 +192,7 @@ export default function PlayRoom() {
             <Card
               key={it.id}
               onClick={() => handleSelect(it)}
-              className='items-card group relative w-[25vw] h-[25vw] max-w-[400px] max-h-[400px] cursor-pointer overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105 shadow-lg'
+              className='items-card group relative w-[22vw] h-[22vw] max-w-[400px] max-h-[400px] cursor-pointer overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105 shadow-lg'
               style={{
                 animationDelay: `${index * 150}ms`,
                 backgroundImage: `url(${getSrc(it.backgroundImage)})`,
@@ -199,21 +210,27 @@ export default function PlayRoom() {
                 />
                 {bets[items.findIndex(i => i.id === it.id)] > 0 && (
                   <span className='absolute bottom-3 right-3 flex items-center gap-1 bg-black text-white text-sm px-2 py-1 rounded-full'>
-                    {/* รูปเหรียญ */}
                     <Image
-                      src={Coin} // หรือ '@/app/dashboard/assets/coin.svg' ตาม path ที่คุณใช้
+                      src={Coin}
                       alt='coin'
                       width={18}
                       height={18}
                       className='inline-block'
                     />
-                    {/* จำนวนเงิน */}
                     {bets[items.findIndex(i => i.id === it.id)]}
                   </span>
                 )}
               </CardContent>
             </Card>
           ))}
+        </div>
+        <div>
+          <button
+            onClick={handleConfirmAll}
+            className='px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600'
+          >
+            Confirm
+          </button>
         </div>
       </div>
       <button
@@ -228,6 +245,7 @@ export default function PlayRoom() {
           className='cursor-pointer hover:scale-110 transition-transform duration-200'
         />
       </button>
+
       <Modal
         title='Hoo Hey How (Fish-Prawn-Crab) Rules'
         isOpen={isRulesOpen}

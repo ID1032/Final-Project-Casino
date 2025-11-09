@@ -5,9 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 
 // Import image
-import Player from '../../home/assets/player.svg';
-import Dealer from '../../home/assets/dealer.svg';
-import DealerHover from '../../home/assets/Dealer_hover.svg';
+import Player from '@/app/dashboard/player.svg';
+import Dealer from '@/app/dashboard/dealer.svg';
+import DealerHover from '@/app/dashboard/Dealer_hover.svg';
 
 interface Mode {
   id: number;

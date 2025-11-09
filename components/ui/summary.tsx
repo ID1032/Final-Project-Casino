@@ -24,13 +24,13 @@ export default function SummaryModal({
   title,
   items,
 }: SummaryModalProps) {
-  if (!isOpen) return null
-
   const total = React.useMemo(() => items.reduce((sum, i) => sum + i.points, 0), [items])
   const isWin = total >= 0
 
+  if (!isOpen) return null
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50" role="dialog" aria-modal="true" aria-label="Round summary">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/20" role="dialog" aria-modal="true" aria-label="Round summary">
       <div className="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
         <div className="px-7 py-8 md:px-10 md:py-10">
           <h2 className="text-4xl md:text-5xl font-extrabold text-center tracking-tight">
@@ -42,6 +42,7 @@ export default function SummaryModal({
 
           <div className="mt-8 space-y-6">
             {items.map((item) => {
+              if (item.points === 0) return null;
               const positive = item.points >= 0
               return (
                 <div key={item.label} className="flex items-center justify-between text-lg md:text-xl font-semibold">

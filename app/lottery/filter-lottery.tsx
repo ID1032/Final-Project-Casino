@@ -1,4 +1,4 @@
-import { LotteryItem } from '@/app/lottery/mainpage/data';
+import { LotteryItem } from '@/app/lottery/data';
 
 export function filterLotteryData(
   data: LotteryItem[],

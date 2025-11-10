@@ -1,20 +1,24 @@
 'use client';
 
-import { LotteryItem } from '@/app/lottery/mainpage/data';
+import React from 'react';
+import { LotteryItem } from '@/app/lottery/data';
 type Props = {
   data: LotteryItem;
+  onClick?: () => void;
 };
 
-export default function LotteryPanel({ data }: Props) {
+export default function LotteryPanel({ data, onClick }: Props) {
   const isUnavailable = data == null || !data.available;
 
   return (
-    <div className='relative z-10 flex flex-col space-y-2 rounded-xl items-center mx-auto justify-center w-fit'>
+    <div className='relative z-10 flex flex-col space-y-2 rounded-xl items-center justify-center mx-auto w-fit ' 
+    onClick={!isUnavailable ? onClick : undefined}
+    >
       {/*Lotter number panel*/}
-      <div className='justify-center lative rounded-md  shadow-lg'>
+      <div className='justify-center lative rounded-md shadow-lg'>
         <button
           disabled={isUnavailable}
-          className={`w-full max-w-xs py-2 bg-[#b22222] rounded-md p-4 font-bold transition
+          className={`flex items-center justify-center w-full max-w-[300px] h-full py-6 bg-[#b22222] rounded-md mx-auto font-bold transition
           ${isUnavailable ? 'opacity-70 cursor-not-allowed' : 'hover:bg-white'}`}
         >
           {/* Light Bulbs Around Border */}
@@ -60,11 +64,11 @@ export default function LotteryPanel({ data }: Props) {
             </div>
           </div>
 
-          <div className='relative rounded-xl p-6 justify-center bg-[#5d0000] border-4 border-[#ffffff]  grid grid-cols-3 sm:gap-6 mt-4 mb-4 ml-1 mr-1 w-full h-full'>
+          <div className='relative rounded-xl p-6 mx-auto bg-[#5d0000] border-4 border-[#ffffff] grid grid-cols-3 gap-2 mt-2 mb-2 ml-5 mr-5 w-full max-w-[278px] h-full max-h[136px]'>
             {data.numbers.map((num, idx) => (
               <div
                 key={idx}
-                className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black  text-black text-center font-bold px-3 py-2 rounded text-base sm:text-lg md:text-xl w-full'
+                className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black  text-black  text-center font-bold rounded mx-auto text-base sm:text-lg md:text-xl w-[45px] h-full'
               >
                 {num}
               </div>

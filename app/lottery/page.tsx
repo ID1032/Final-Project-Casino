@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
-import { SiteHeader } from '@/app/lottery/mainpage/site-header';
+import { SiteHeader } from '@/app/lottery/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import LotteryGrid from '@/app/lottery/mainpage/grid';
-import { lotteryData } from '@/app/lottery/mainpage/data';
-import Pagination from '@/app/lottery/mainpage/pagination';
-import { filterLotteryData } from '@/app/lottery/mainpage/filter-lottery';
+import LotteryGrid from '@/app/lottery/grid';
+import { lotteryData } from '@/app/lottery/data';
+import Pagination from '@/app/lottery/pagination';
+import { filterLotteryData } from '@/app/lottery/filter-lottery';
 
 export default function LotteryPage() {
   const [query, setQuery] = useState('');
@@ -67,17 +67,22 @@ export default function LotteryPage() {
                     </span>
                   </div>
                 </div>
-
                 <div className='bg-gradient-to-b from-[#D2C7BD] to-[#e89c3f7d] border-7 border-[#FFC548e0]/88 p-6 rounded-lg w-auto h-auto'>
                   {isLoading ? (
                     <div className='flex justify-center items-center h-64'>
                       <div className='animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-yellow-400'></div>
                     </div>
                   ) : (
-                    <LotteryGrid items={paginatedItems} pageKey={currentPage} />
+                    <div className='flex justify-center w-full'>
+                      <div className='w-full max-w-screen-xl px-2'>
+                        <LotteryGrid
+                          items={paginatedItems}
+                          pageKey={currentPage}
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
-
                 <div className='space-y-10'>
                   <Pagination
                     currentPage={currentPage}

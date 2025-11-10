@@ -394,17 +394,24 @@ export async function buyLottery(
       };
     }
 
-    // Determine draw date based on current date
+    // Determine draw date based on weekly schedule (draw every Sunday at 12:00)
     const now = new Date();
-    let drawDate: Date;
 
-    if (now.getDate() <= 15) {
-      // Buying between 1-15: draw date is 16th of current month
-      drawDate = new Date(now.getFullYear(), now.getMonth(), 16);
-    } else {
-      // Buying between 16-31: draw date is 1st of next month
-      drawDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    // Restrict purchases to Monday-Saturday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const todayDay = now.getDay();
+    if (todayDay === 0) {
+      return {
+        success: false,
+        message:
+          'Purchases are only allowed Monday through Saturday. Draws occur Sunday at 12:00.',
+      };
     }
+
+    // Calculate next Sunday
+    const daysUntilSunday = (7 - todayDay) % 7; // if today is Sunday this would be 0, but we already blocked Sunday
+    const drawDate = new Date(now);
+    drawDate.setDate(now.getDate() + daysUntilSunday);
+    drawDate.setHours(12, 0, 0, 0); // set draw time to 12:00 (noon)
 
     // Format dates for DB
     const buyDateIso = now.toISOString();

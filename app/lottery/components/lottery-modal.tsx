@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { LotteryItem } from '@/app/lottery/data';
+import { LotteryItem } from '@/app/lottery/components/data';
 
 {
   /*
@@ -134,19 +134,19 @@ export default function LotteryModal({ item, onClose }: Props) {
         </div>
 
         {/* Progress Bar + Status */}
-        <div className='flex justify-between items-center mb-4 px-2'>
-          <div className='text-sm font-semibold bg-yellow-500 text-black px-2 py-1 rounded-full'>
+        <div className='flex justify-center items-center mb-4 px-30'>
+          <div className='text-sm font-bold bg-gradient-to-b from-[#FF0000A3] to-[#EE9F3D] text-white px-35 py-1 rounded-full'>
             {`${item.available}/5`}
           </div>
-          <div className='text-sm font-semibold'>
-            {isUnavailable ? 'Not Available' : 'Available'}
+          <div className='text-sm font-bold rounded-full bg-gradient-to-r from-[#FFFFFF] to-[#FFC548E0] text-[#DA7814] px-20 py-1'>
+            Available
           </div>
         </div>
 
         {/* Buttons */}
-        <div className='flex justify-center gap-50 mt-2'>
+        <div className='flex justify-center gap-50 mt-10'>
           <button
-            className={`px-20 py-2 rounded-full font-bold hover:brightness-120 ${
+            className={`px-20 py-3 rounded-full font-bold hover:brightness-120 ${
               isUnavailable
                 ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                 : 'bg-gradient-to-b from-[#DA7814] to-[#74400B] text-white'
@@ -157,7 +157,7 @@ export default function LotteryModal({ item, onClose }: Props) {
             Purchase
           </button>
           <button
-            className='px-20 py-2 bg-gradient-to-b from-[#BBBBBB] to-[#525252] hover:brightness-120 text-white rounded-full font-bold'
+            className='px-20 py-3 bg-gradient-to-b from-[#BBBBBB] to-[#525252] hover:brightness-120 text-white rounded-full font-bold'
             onClick={onClose}
           >
             Back

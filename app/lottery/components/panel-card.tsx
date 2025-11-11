@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LotteryItem } from '@/app/lottery/data';
+import { LotteryItem } from '@/app/lottery/components/data';
 type Props = {
   data: LotteryItem;
   onClick?: () => void;
@@ -11,8 +11,9 @@ export default function LotteryPanel({ data, onClick }: Props) {
   const isUnavailable = data == null || !data.available;
 
   return (
-    <div className='relative z-10 flex flex-col space-y-2 rounded-xl items-center justify-center mx-auto w-fit ' 
-    onClick={!isUnavailable ? onClick : undefined}
+    <div
+      className='relative z-10 flex flex-col space-y-2 rounded-xl items-center justify-center mx-auto w-fit '
+      onClick={!isUnavailable ? onClick : undefined}
     >
       {/*Lotter number panel*/}
       <div className='justify-center lative rounded-md shadow-lg'>

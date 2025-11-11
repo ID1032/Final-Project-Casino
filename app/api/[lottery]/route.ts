@@ -1,17 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  buyLottery,
-  processLottoRound,
-  LotteryStatus,
-  ProcessResult,
-} from '@/lib/actions/lottery_back';
+import { LotteryStatus, ProcessResult } from '@/lib/actions/lottery_back';
+import { buyLottery } from '../../../lib/actions/lottery_back/buyLotteryFunction';
+import { processLottoRound } from '../../../lib/actions/lottery_back/processLottoRound';
 
 // GET: Fetch lottery info or results
-export async function GET(
-  request: Request,
-  { params }: { params: { lottery: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
@@ -75,7 +69,7 @@ export async function GET(
 
 // POST: Buy lottery ticket or process lottery round
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { lottery: string } }
 ) {
   try {
@@ -127,10 +121,7 @@ export async function POST(
 }
 
 // PUT: Update lottery ticket status
-export async function PUT(
-  request: Request,
-  { params }: { params: { lottery: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();
     const body = await request.json();

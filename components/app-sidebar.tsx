@@ -15,6 +15,8 @@ import {
   Users,
   HelpCircle,
   LogOut,
+  ShoppingBag,
+  Ticket,
 } from 'lucide-react';
 
 import { NavMain } from '@/app/home/nav-main';
@@ -57,6 +59,20 @@ const data = {
       title: 'SLOT',
       url: '#',
       icon: Target,
+    },
+  ],
+  navLottery: [
+    {
+      id: 'SHOP',
+      title: 'Shop',
+      url: '#',
+      icon: ShoppingBag,
+    },
+    {
+      id: 'MY_LOTTERY',
+      title: 'My Lottery',
+      url: '#',
+      icon: Ticket,
     },
   ],
 };
@@ -142,7 +158,9 @@ export function AppSidebar({ hideContent = false, ...props }: AppSidebarProps) {
 
       {!hideContent && (
         <SidebarContent>
-          <NavMain items={data.navMain} />
+          <NavMain
+            items={pathname === '/lottery' ? data.navLottery : data.navMain}
+          />
         </SidebarContent>
       )}
 

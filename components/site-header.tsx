@@ -95,7 +95,7 @@ export function SiteHeader() {
                 <span className='font-semibold tracking-wider'>888,888</span>
               </Button>
               {/* Deposit button */}
-              <Link href='/deposit'>
+              <Link href='/TopUp'>
                 <Button className='bg-[#DA7814] hover:brightness-110 text-white rounded-lg px-5 py-2 h-10 flex items-center gap-2'>
                   <PlusCircle className='h-5 w-5 opacity-90' />
                   <span className='font-semibold'>Deposit</span>

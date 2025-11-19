@@ -8,10 +8,54 @@ function DigitPanel({
   delay?: number;
 }) {
   return (
-    <div className='bg-gray-800 rounded-lg p-4 flex justify-center gap-2 shadow-inner border-2 border-yellow-500'>
-      {digits.map((d, i) => (
-        <AnimatedDigit key={i} finalDigit={d} delay={delay + i * 100} />
-      ))}
+    <div className='justify-center relative rounded-md shadow-lg p-4 flex items-center w-full h-full bg-[#b22222] mx-auto font-bold transition'>
+      {/* Light Bulbs Around Border */}
+          <div className='absolute inset-0 pointer-events-none'>
+            {/* Top Row */}
+            <div className='absolute top-1 left-0 right-0 flex justify-between px-4'>
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`top-${i}`}
+                  className='w-3 h-3 bg-yellow-400 rounded-full shadow-[0_0_6px_rgba(255,215,0,0.8)]'
+                />
+              ))}
+            </div>
+
+            {/* Bottom Row */}
+            <div className='absolute bottom-1 left-0 right-0 flex justify-between px-4'>
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`bottom-${i}`}
+                  className='w-3 h-3 bg-yellow-400 rounded-full shadow-[0_0_6px_rgba(255,215,0,0.8)]'
+                />
+              ))}
+            </div>
+
+            {/* Left Column */}
+            <div className='absolute top-2 bottom-1 left-1 flex flex-col justify-between py-2'>
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`left-${i}`}
+                  className='w-3 h-3 bg-yellow-400 rounded-full shadow-[0_0_6px_rgba(255,215,0,0.8)]'
+                />
+              ))}
+            </div>
+
+            {/* Right Column */}
+            <div className='absolute top-1 bottom-1 right-1 flex flex-col justify-between py-4'>
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`right-${i}`}
+                  className='w-3 h-3 bg-yellow-400 rounded-full shadow-[0_0_6px_rgba(255,215,0,0.8)]'
+                />
+              ))}
+            </div>
+          </div>
+      <div className='relative rounded-xl p-6 mx-auto bg-[#5d0000] border-4 border-[#ffffff] grid grid-cols-3 gap-2 w-full h-full'>
+        {digits.map((d, i) => (
+          <AnimatedDigit key={i} finalDigit={d} delay={delay + i * 10} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -19,7 +63,7 @@ function DigitPanel({
 export default function AwardView({
   numbers,
   onBack,
-  onHistory
+  onHistory,
 }: {
   numbers: number[][];
   onBack: () => void;
@@ -30,24 +74,25 @@ export default function AwardView({
       <div className='text-3xl font-bold text-yellow-400'>🎉 JACKPOT 🎉</div>
 
       {/* 🥇 First Prize */}
-      <div className='text-center'>
-        <div className='text-xl font-bold text-yellow-400 mb-2'>1st Prize</div>
+      <div className='text-center w-fit max-w-md scale-125 mb-10'>
+        <div className='text-2xl font-extrabold text-yellow-400 mb-2'>1st Prize</div>
         <DigitPanel digits={numbers[0]} delay={0} />
       </div>
 
       {/* 🥈 Second & Third Prize */}
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='items-center  grid grid-cols-2 gap-20 relative scale-100'>
+        
         <div className='text-center'>
           <div className='text-xl font-bold text-yellow-300 mb-2'>
             2nd Prize
           </div>
-          <DigitPanel digits={numbers[1]} delay={500} />
+          <DigitPanel digits={numbers[1]} delay={100} />
         </div>
         <div className='text-center'>
           <div className='text-xl font-bold text-yellow-200 mb-2'>
             3rd Prize
           </div>
-          <DigitPanel digits={numbers[2]} delay={1000} />
+          <DigitPanel digits={numbers[2]} delay={200} />
         </div>
       </div>
 

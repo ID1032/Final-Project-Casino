@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 interface AnimatedDigitProps {
   finalDigit: number;
   delay?: number;
+  isUnavailable?: boolean;
 }
 
 export default function AnimatedDigit({ finalDigit, delay = 0 }: AnimatedDigitProps) {

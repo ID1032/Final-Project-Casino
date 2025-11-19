@@ -69,7 +69,7 @@ export default function LotteryPanel({ data, onClick }: Props) {
             {data.numbers.map((num, idx) => (
               <div
                 key={idx}
-                className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black  text-black  text-center font-bold rounded mx-auto text-base sm:text-lg md:text-xl w-[45px] h-full'
+                className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black  text-black  text-center font-bold rounded mx-auto sm:text-lg md:text-xl w-[45px] h-full'
               >
                 {num}
               </div>

@@ -10,7 +10,7 @@ import AwardView from '@/app/lottery/components/award-view';
 import { generateAwardNumbers } from '@/app/lottery/components/generate-award';
 import HistoryDraw from '@/app/lottery/components/historyDraw';
 import { MenuProvider } from '@/app/home/contexts/menu-context';
-import { SiteHeader } from '@/components/site-header';
+import { SiteHeader } from '@/app/lottery/components/site-header';
 
 export default function LotteryPage() {
   const [query, setQuery] = useState('');
@@ -30,6 +30,7 @@ export default function LotteryPage() {
 
   const handleCardClick = () => {
     setAwardNumbers(generateAwardNumbers());
+    setShowHistoryDraw(false);
     setShowAwardView(true);
   };
 
@@ -51,6 +52,7 @@ export default function LotteryPage() {
             onSearch={q => {
               setQuery(q);
               setCurrentPage(1);
+              setIsLoading(true);
 
               setTimeout(() => {
                 setIsLoading(false);
@@ -118,7 +120,10 @@ export default function LotteryPage() {
                       <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={setCurrentPage}
+                        onPageChange={(page)=>{
+                          setCurrentPage(page);
+                          setShowHistoryDraw(false);
+                        }}
                       />
                     </div>
                   )}

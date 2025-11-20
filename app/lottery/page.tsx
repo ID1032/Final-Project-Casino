@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
-import { SiteHeader } from '@/app/lottery/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import LotteryGrid from '@/app/lottery/components/grid';
 import { lotteryData } from '@/app/lottery/components/data';
@@ -11,6 +10,7 @@ import AwardView from '@/app/lottery/components/award-view';
 import { generateAwardNumbers } from '@/app/lottery/components/generate-award';
 import HistoryDraw from '@/app/lottery/components/historyDraw';
 import { MenuProvider } from '@/app/home/contexts/menu-context';
+import { SiteHeader } from '@/components/site-header';
 
 export default function LotteryPage() {
   const [query, setQuery] = useState('');

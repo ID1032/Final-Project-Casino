@@ -15,6 +15,8 @@ import {
   Users,
   HelpCircle,
   LogOut,
+  ShoppingBag,
+  Ticket,
 } from 'lucide-react';
 
 import { NavMain } from '@/app/home/nav-main';
@@ -30,7 +32,7 @@ import {
 } from '@/components/ui/sidebar';
 
 import Logo from '@/assets/logo.svg';
-import { useAuth, handleSignOut } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/client';
 
 const data = {
   navMain: [
@@ -59,6 +61,20 @@ const data = {
       icon: Target,
     },
   ],
+  navLottery: [
+    {
+      id: 'SHOP',
+      title: 'Shop',
+      url: '#',
+      icon: ShoppingBag,
+    },
+    {
+      id: 'MY_LOTTERY',
+      title: 'My Lottery',
+      url: '#',
+      icon: Ticket,
+    },
+  ],
 };
 
 const languages: Language[] = [
@@ -74,7 +90,28 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 
 export function AppSidebar({ hideContent = false, ...props }: AppSidebarProps) {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const supabase = React.useMemo(() => createClient(), []);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  React.useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      setIsAuthenticated(Boolean(data.session));
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      load();
+    });
+    return () => {
+      isMounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [supabase]);
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
   return (
     <Sidebar collapsible='offcanvas' className='px-[32px]' {...props}>
       <SidebarHeader>
@@ -121,7 +158,9 @@ export function AppSidebar({ hideContent = false, ...props }: AppSidebarProps) {
 
       {!hideContent && (
         <SidebarContent>
-          <NavMain items={data.navMain} />
+          <NavMain
+            items={pathname === '/lottery' ? data.navLottery : data.navMain}
+          />
         </SidebarContent>
       )}
 

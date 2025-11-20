@@ -1,16 +1,18 @@
-'use client';
+"use client";
 import { useMemo, useState } from 'react';
 import Modal from '@/components/ui/rules';
 import SummaryModal from '@/components/ui/summary';
 import { useRouter } from 'next/navigation';
 import DiceResultModal from '@/components/ui/dice-result';
+import { Random_Dice } from '@/app/games/fish-prawn-crab/Random_Dice';
+import { Check_Betting_Results } from '@/app/games/fish-prawn-crab/Check_Betting_Results';
 
 export default function FishPrawnCrabPage() {
   const router = useRouter();
   const [isRulesOpen, setisRulesOpen] = useState(false);
 
   // Simple demo bet amounts, will be replace later
-  const bets = useMemo(
+  const bets = useMemo<Record<string, number>>(
     () => ({
       Chicken: 100,
       Shrimp: 500,
@@ -24,29 +26,39 @@ export default function FishPrawnCrabPage() {
     []
   );
 
-  const [dice, setDice] = useState<string[]>([]);
+  const [diceIndexes, setDiceIndexes] = useState<number[]>([]);
   const [isResultOpen, setIsResultOpen] = useState(false);
   const [isDiceOpen, setIsDiceOpen] = useState(false);
 
+  const diceFaces = useMemo<string[]>(() => {
+    if (diceIndexes.length === 3) {
+      return diceIndexes.map(index => animals[index] ?? '');
+    }
+    return Array(3).fill('');
+  }, [diceIndexes, animals]);
+
+  const betArray = useMemo<number[]>(() => {
+    return animals.map(label => bets[label] ?? 0);
+  }, [animals, bets]);
+
   //For generate dice result, This is for test roll dice modal(may have to adjust)
   const rollDice = () => {
-    const next: string[] = Array.from(
-      { length: 3 },
-      () => animals[Math.floor(Math.random() * 6)]
-    );
-    setDice(next);
+    const next = Random_Dice();
+    setDiceIndexes(next);
     setIsDiceOpen(true);
   };
 
   //Calculate result, if match more than 1 will points will be multiply by the number that match
   const resultItems = useMemo(() => {
-    const items = Object.entries(bets).map(([label, stake]) => {
-      const count = dice.filter(a => a === label).length;
-      const payout = count > 0 ? count * stake : -stake;
-      return { label, points: payout };
-    });
-    return items;
-  }, [bets, dice]);
+    if (diceIndexes.length !== 3) {
+      return animals.map(label => ({ label, points: 0 }));
+    }
+    const results = Check_Betting_Results([...diceIndexes], betArray);
+    return animals.map((label, index) => ({
+      label,
+      points: results[index] ?? 0,
+    }));
+  }, [animals, diceIndexes, betArray]);
 
   return (
     <div>
@@ -117,7 +129,7 @@ export default function FishPrawnCrabPage() {
       {/* Dice result modal */}
       <DiceResultModal
         isOpen={isDiceOpen}
-        dice={dice}
+        dice={diceFaces}
         onClose={() => setIsDiceOpen(false)}
         onSummary={() => {
           setIsDiceOpen(false);
@@ -130,7 +142,7 @@ export default function FishPrawnCrabPage() {
         isOpen={isResultOpen}
         onClose={() => setIsResultOpen(false)}
         onPlayAgain={() => {
-          setDice([]);
+          setDiceIndexes([]);
         }}
         onExit={() => router.push('/dashboard')}
         items={resultItems}

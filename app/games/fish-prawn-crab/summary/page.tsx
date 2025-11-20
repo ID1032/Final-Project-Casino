@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 import { useMemo, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SummaryModal from '@/components/ui/summary';
 import DiceResultModal from '@/components/ui/dice-result';
 import Modal from '@/components/ui/rules';
+import { Random_Dice } from '@/app/games/fish-prawn-crab/Random_Dice';
+import { Check_Betting_Results } from '@/app/games/fish-prawn-crab/Check_Betting_Results';
 
 export default function Summary() {
   const router = useRouter();
@@ -14,53 +16,69 @@ export default function Summary() {
   const bets = useMemo<number[]>(() => {
     const raw = sp.get('bets');
     try {
-      return raw ? JSON.parse(decodeURIComponent(raw)) : [];
+      const parsed = raw ? JSON.parse(decodeURIComponent(raw)) : [];
+      return Array.isArray(parsed) ? parsed.map(Number) : [];
     } catch {
       return [];
     }
   }, [sp]);
+
+  const normalizedBets = useMemo<number[]>(() => {
+    const base = Array(6).fill(0);
+    bets.forEach((value, index) => {
+      if (index < base.length) {
+        const amount = Number(value);
+        base[index] = Number.isFinite(amount) ? amount : 0;
+      }
+    });
+    return base;
+  }, [bets]);
 
   const animals = useMemo(
     () => ['Calabash', 'Crab', 'Fish', 'Tiger', 'Shrimp', 'Chicken'],
     []
   );
 
-  const [dice, setDice] = useState<string[]>([]);
+  const [diceIndexes, setDiceIndexes] = useState<number[]>([]);
   const [isResultOpen, setIsResultOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [isDiceOpen, setIsDiceOpen] = useState(false);
 
+  const diceFaces = useMemo<string[]>(() => {
+    if (diceIndexes.length === 3) {
+      return diceIndexes.map(index => animals[index] ?? '');
+    }
+    return Array(3).fill('');
+  }, [diceIndexes, animals]);
+
   useEffect(() => {
     console.log('🎲 ค่า bets ปัจจุบัน:', bets);
-    const hasBet = bets.some(v => Number(v) > 0);
+    const hasBet = normalizedBets.some(v => Number(v) > 0);
     if (!hasBet) return;
-    if (dice.length > 0 || isResultOpen || isDiceOpen) return;
+    if (diceIndexes.length > 0 || isResultOpen || isDiceOpen) return;
 
-    const rolled = Array.from(
-      { length: 3 },
-      () => animals[Math.floor(Math.random() * animals.length)]
-    );
-
-    setDice(rolled);
+    const rolled = Random_Dice();
+    setDiceIndexes(rolled);
     setIsDiceOpen(true);
-  }, [bets, dice, isResultOpen, isDiceOpen, animals]);
+  }, [normalizedBets, diceIndexes, isResultOpen, isDiceOpen]);
 
-  const resultItems = useMemo(() => {
-    const items = animals.map((label, index) => {
-      const stake = bets[index] || 0;
-      const count = dice.filter(a => a === label).length;
-      const payout = count > 0 ? count * stake : -stake;
-      return { label, points: payout };
-    });
-    return items;
-  }, [bets, dice, animals]);
+  const summaryItems = useMemo(() => {
+    if (diceIndexes.length !== 3) {
+      return animals.map(label => ({ label, points: 0 }));
+    }
+    const results = Check_Betting_Results([...diceIndexes], normalizedBets);
+    return animals.map((label, index) => ({
+      label,
+      points: results[index] ?? 0,
+    }));
+  }, [animals, diceIndexes, normalizedBets]);
 
   return (
     <>
       {/* Dice result modal */}
       <DiceResultModal
         isOpen={isDiceOpen}
-        dice={dice}
+        dice={diceFaces}
         onClose={() => setIsDiceOpen(false)}
         onSummary={() => {
           setIsDiceOpen(false);
@@ -76,7 +94,7 @@ export default function Summary() {
           router.push('/games/fish-prawn-crab/mode');
         }}
         onExit={() => router.push('/dashboard')}
-        items={resultItems}
+        items={summaryItems}
       // total={totalPoints}
       />
 

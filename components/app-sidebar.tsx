@@ -86,9 +86,16 @@ const languages: Language[] = [
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   hideContent?: boolean;
+  onMyLotteryClick?: (showMyLottery: boolean) => void;
+  showMyLottery?: boolean;
 };
 
-export function AppSidebar({ hideContent = false, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  hideContent = false,
+  onMyLotteryClick,
+  showMyLottery,
+  ...props
+}: AppSidebarProps) {
   const pathname = usePathname();
   const supabase = React.useMemo(() => createClient(), []);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
@@ -112,6 +119,7 @@ export function AppSidebar({ hideContent = false, ...props }: AppSidebarProps) {
     await supabase.auth.signOut();
     window.location.href = '/login';
   };
+  
   return (
     <Sidebar collapsible='offcanvas' className='px-[32px]' {...props}>
       <SidebarHeader>
@@ -158,9 +166,34 @@ export function AppSidebar({ hideContent = false, ...props }: AppSidebarProps) {
 
       {!hideContent && (
         <SidebarContent>
-          <NavMain
-            items={pathname === '/lottery' ? data.navLottery : data.navMain}
-          />
+          {pathname === '/lottery' ? (
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onMyLotteryClick?.(false)} // false = Shop
+                  className={`flex items-center gap-3 text-white rounded-lg px-3 py-2 transition-colors duration-200
+                    ${!showMyLottery? 'bg-gradient-to-r from-amber-500 to-amber-700' : 'hover:bg-amber-800'}`}
+                >
+                  <ShoppingBag size={18} />
+                  <span className='text-sm font-semibold uppercase'>Shop</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onMyLotteryClick?.(true)} // true = My Lottery
+                  className={`flex items-center gap-3 text-white rounded-lg px-3 py-2 transition-colors duration-200
+                    ${showMyLottery === true ? 'bg-gradient-to-r from-amber-500 to-amber-700' : 'hover:bg-amber-800'}`}
+                >
+                  <Ticket size={18} />
+                  <span className='text-sm font-semibold uppercase'>
+                    My Lottery
+                  </span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          ) : (
+            <NavMain items={data.navMain} />
+          )}
         </SidebarContent>
       )}
 

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Search, Settings, User, Coins, PlusCircle } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type Props = {
@@ -14,9 +14,46 @@ type Props = {
 };
 
 export function SiteHeader({ onSearch }: Props) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const supabase = useMemo(() => createClient(), []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [displayName, setDisplayName] = useState<string | undefined>(undefined);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+  const [coins] = useState<number>(0);
   const [input, setInput] = useState('');
-  
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      if (error) {
+        console.error('Error loading session', error);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+      const session = data.session;
+      const user = session?.user;
+      setIsAuthenticated(Boolean(session));
+      setDisplayName(
+        (user?.user_metadata?.name as string | undefined) ||
+          (user?.email as string | undefined)
+      );
+      setAvatarUrl(user?.user_metadata?.picture as string | undefined);
+      setIsLoading(false);
+    };
+
+    loadSession();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      loadSession();
+    });
+    return () => {
+      isMounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +110,7 @@ export function SiteHeader({ onSearch }: Props) {
                 className='bg-[#4C3519] border-[#67533C] text-white rounded-lg px-4 py-2 h-10 flex items-center gap-2'
               >
                 <Coins className='h-4 w-4 text-[#F5A524]' />
-                <span className='font-semibold tracking-wider'>888,888</span>
+                <span className='font-semibold tracking-wider'>{coins}</span>
               </Button>
               {/* Deposit button */}
               <Link href='/deposit'>
@@ -84,11 +121,14 @@ export function SiteHeader({ onSearch }: Props) {
               </Link>
               <div className='relative h-8 w-8 rounded-full'>
                 <Avatar className='h-8 w-8'>
-                  <AvatarImage src={user?.image || ''} alt={user?.name || ''} />
+                  <AvatarImage
+                    src={avatarUrl || ''}
+                    alt={displayName|| ''}
+                  />
                   <AvatarFallback className='bg-[#8B4513] text-white'>
-                    {user?.name?.charAt(0)?.toUpperCase() || (
-                      <User className='h-4 w-4' />
-                    )}
+                    {displayName?.charAt(0)?.toUpperCase() || (
+                        <User className='h-4 w-4' />
+                      )}
                   </AvatarFallback>
                 </Avatar>
               </div>

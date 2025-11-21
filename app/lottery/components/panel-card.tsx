@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { LotteryItem } from '@/app/lottery/components/data';
 type Props = {
   data: LotteryItem;
@@ -11,6 +10,7 @@ export default function LotteryPanel({ data, onClick }: Props) {
   const isUnavailable = data == null || !data.available;
 
   return (
+    
     <div
       className='relative z-10 flex flex-col space-y-2 rounded-xl items-center justify-center mx-auto w-fit '
       onClick={!isUnavailable ? onClick : undefined}
@@ -65,15 +65,19 @@ export default function LotteryPanel({ data, onClick }: Props) {
             </div>
           </div>
 
-          <div className='relative rounded-xl p-6 mx-auto bg-[#5d0000] border-4 border-[#ffffff] grid grid-cols-3 gap-2 mt-2 mb-2 ml-5 mr-5 w-full max-w-[278px] h-full max-h[136px]'>
-            {data.numbers.map((num, idx) => (
-              <div
-                key={idx}
-                className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black  text-black  text-center font-bold rounded mx-auto sm:text-lg md:text-xl w-[45px] h-full'
-              >
-                {num}
-              </div>
-            ))}
+          <div className='relative rounded-xl p-6 mx-auto bg-[#5d0000] border-4 border-[#ffffff] grid grid-cols-3 gap-2 mt-2 mb-2 ml-5 mr-5 w-full max-w-[278px] h-full max-h-[136px]'>
+            {data.numbers.length > 0 ? (
+              data.numbers.map((num, idx) => (
+                <div
+                  key={idx}
+                  className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black text-black font-bold rounded-full w-[45px] h-[45px] shadow-md'
+                >
+                  {num}
+                </div>
+              ))
+            ) : (
+              <p className='text-white text-sm'>No numbers</p>
+            )}
           </div>
         </button>
       </div>

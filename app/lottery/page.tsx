@@ -1,9 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import LotteryGrid from '@/app/lottery/components/grid';
-import { lotteryData } from '@/app/lottery/components/data';
+import {
+  LotteryItem,
+  LotteryApiRow,
+  UserProfile,
+} from '@/app/lottery/components/data';
 import Pagination from '@/app/lottery/components/pagination';
 import { filterLotteryData } from '@/app/lottery/components/filter-lottery';
 import AwardView from '@/app/lottery/components/award-view';
@@ -11,12 +15,20 @@ import { generateAwardNumbers } from '@/app/lottery/components/generate-award';
 import HistoryDraw from '@/app/lottery/components/historyDraw';
 import { MenuProvider } from '@/app/home/contexts/menu-context';
 import { SiteHeader } from '@/app/lottery/components/site-header';
+import LotteryModal from '@/app/lottery/components/lottery-modal';
+import MyLotteryView, {
+  LotteryTicket,
+} from '@/app/lottery/components/mylotteryview';
+
+import { useAuth } from '@/lib/auth';
 
 export default function LotteryPage() {
   const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+
+  const [lotteryData, setLotteryData] = useState<LotteryItem[]>([]);
 
   const filtered = filterLotteryData(lotteryData, query);
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
@@ -27,14 +39,61 @@ export default function LotteryPage() {
 
   const [showAwardView, setShowAwardView] = useState(false);
   const [awardNumbers, setAwardNumbers] = useState<number[][]>([]);
+  const [showHistoryDraw, setShowHistoryDraw] = useState(false);
 
-  const handleCardClick = () => {
+  const { user, isAuthenticated } = useAuth();
+  const [lotteries, setLotteries] = useState<LotteryTicket[]>([]);
+  const [showMyLottery, setShowMyLottery] = useState(false);
+
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  const [showModal, setShowModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<LotteryItem | null>(null);
+
+  useEffect(() => {
+    if (user?.email) {
+      // Fetch profile
+      fetch(`/api/lottery?profileEmail=${user.email}`)
+        .then(res => (res.ok ? res.json() : Promise.reject(res)))
+        .then((data: UserProfile) => {
+          setProfile(data);
+        })
+        .catch(err => console.error('Profile fetch failed:', err));
+
+      // Fetch user lottery tickets
+      fetch(`/api/lottery?userEmail=${user.email}`)
+        .then(res => res.json())
+        .then((data: LotteryTicket[])=> {
+          setLotteries(data);
+        })
+        .catch(err => console.error('Lottery fetch failed:', err));
+    }
+  }, [user]);
+
+  const handleAwardClick = () => {
     setAwardNumbers(generateAwardNumbers());
     setShowHistoryDraw(false);
     setShowAwardView(true);
   };
 
-  const [showHistoryDraw, setShowHistoryDraw] = useState(false);
+  const handleCardClick = (item: LotteryItem) => {
+    setSelectedItem(item);
+    setShowModal(true);
+  };
+
+  useEffect(() => {
+    fetch('/api/[lottery]')
+      .then(res => res.json())
+      .then((data: LotteryApiRow[]) => {
+        const formatted = data.map((row, i: number) => ({
+          id: i + 1,
+          numbers: row.lotteryNo.split('-').map(Number),
+          available: row.remain ?? row.available ?? 0,
+        }));
+        setLotteryData(formatted);
+      })
+      .catch(err => console.error('Failed to fetch lottery data:', err));
+}, []);
 
   return (
     <MenuProvider>
@@ -46,16 +105,20 @@ export default function LotteryPage() {
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant='inset' />
+        <AppSidebar
+          variant='inset'
+          showMyLottery={showMyLottery}
+          onMyLotteryClick={setShowMyLottery}
+        />
         <SidebarInset>
           <SiteHeader
             onSearch={q => {
               setQuery(q);
               setCurrentPage(1);
-              setIsLoading(true);
+              setSearchLoading(true);
 
               setTimeout(() => {
-                setIsLoading(false);
+                setSearchLoading(false);
               }, 1000);
             }}
           />
@@ -74,7 +137,7 @@ export default function LotteryPage() {
                   {!showAwardView && (
                     <div className='absolute right-4 flex items-center gap-4 z-50'>
                       <div
-                        onClick={handleCardClick}
+                        onClick={handleAwardClick}
                         className='flex items-center bg-[#EE9F3D] rounded-lg px-4 py-2 shadow-md hover:scale-105 transition-transform duration-200'
                       >
                         <div className='w-6 h-6 mr-2 flex items-center justify-center text-[10px] font-bold text-red-600'>
@@ -92,10 +155,15 @@ export default function LotteryPage() {
                   )}
 
                   <div className='bg-gradient-to-b from-[#D2C7BD] to-[#e89c3f7d] border-7 border-[#FFC548e0]/88 p-6 rounded-lg w-auto h-full '>
-                    {isLoading ? (
+                    {searchLoading ? (
                       <div className='flex justify-center items-center h-64'>
-                        <div className='animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-yellow-400'></div>
+                        <div className='animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-yellow-400'></div>{' '}
                       </div>
+                    ) : showMyLottery ? (
+                      <MyLotteryView
+                        tickets={lotteries}
+                        onBack={() => setShowMyLottery(false)} // ✅ allow going back
+                      />
                     ) : showHistoryDraw ? (
                       <HistoryDraw onBack={() => setShowHistoryDraw(false)} />
                     ) : showAwardView ? (
@@ -108,8 +176,12 @@ export default function LotteryPage() {
                       <div className='flex justify-center w-full'>
                         <div className='w-full max-w-screen-xl px-2'>
                           <LotteryGrid
-                            items={paginatedItems}
+                            items={lotteryData.slice(
+                              (currentPage - 1) * itemsPerPage,
+                              currentPage * itemsPerPage
+                            )}
                             pageKey={currentPage}
+                            onCardClick={handleCardClick}
                           />
                         </div>
                       </div>
@@ -120,7 +192,7 @@ export default function LotteryPage() {
                       <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={(page)=>{
+                        onPageChange={page => {
                           setCurrentPage(page);
                           setShowHistoryDraw(false);
                         }}
@@ -133,6 +205,47 @@ export default function LotteryPage() {
           </div>
         </SidebarInset>
       </SidebarProvider>
+      {/* ✅ Render modal when needed */}
+      {showModal && selectedItem && (
+        <LotteryModal
+          item={selectedItem}
+          userEmail={user?.email ?? ''}
+          onClose={() => setShowModal(false)}
+          onPurchaseSuccess={() => {
+            setShowMyLottery(true);
+
+            // Re-fetch tickets after purchase
+            if (user?.email) {
+              fetch(`/api/lottery?userEmail=${user.email}`)
+                .then(res => res.json())
+                .then(data => setLotteries(data));
+            }
+
+            // 🔄 Re-fetch lottery numbers to update availability
+            fetch('/api/lottery/all')
+              .then(res => (res.ok ? res.json() : Promise.reject(res)))
+              .then(data => {
+                const formatted: LotteryItem[] = data.map(
+                  (row: LotteryApiRow, i: number) => {
+                    const numbers = row.lotteryNo
+                      ? row.lotteryNo.split('-').map(Number)
+                      : [];
+                    return {
+                      id: i + 1,
+                      numbers,
+                      available: row.remain ?? row.available ?? 0,
+                    };
+                  }
+                );
+
+                setLotteryData(formatted);
+              })
+              .catch(err =>
+                console.error('Failed to refresh lottery data:', err)
+              );
+          }}
+        />
+      )}
     </MenuProvider>
   );
 }

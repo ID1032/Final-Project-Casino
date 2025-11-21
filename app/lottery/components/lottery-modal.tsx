@@ -1,78 +1,41 @@
 'use client';
 
-import { useEffect } from 'react';
 import { LotteryItem } from '@/app/lottery/components/data';
-
-{
-  /*
-export default function LotteryModal({
-  item,
-  onClose,
-}: {
-  item: LotteryItem;
-  onClose: () => void;
-}) {
-  const isUnavailable = !item.available;
-  const handlePurchase = () => {
-  // Simulate purchase logic
-  console.log('Purchased:', item.numbers);
-
-  // Auto-close after short delay
-  setTimeout(() => {
-    onClose();
-  }, 600); // 0.5 second delay
-};
-
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-80 shadow-lg relative">
-        <h2 className="text-2xl font-bold text-center mb-4">{item.numbers.join(' ')}</h2>
-        <p className="text-center text-gray-600 mb-4">
-          {isUnavailable ? 'Not Available' : `${item.available}/5 Available`}
-        </p>
-        <div className="flex justify-center gap-4">
-          <button
-            className={`px-4 py-2 rounded-lg font-semibold ${
-              isUnavailable
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-orange-500 text-white hover:bg-orange-600'
-            }`}
-            disabled={isUnavailable}
-            onClick={handlePurchase}
-          >
-            Purchase
-          </button>
-          <button
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600"
-            onClick={onClose}
-          >
-            Back
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}*/
-}
 
 type Props = {
   item: LotteryItem;
   onClose: () => void;
+  userEmail?: string;
+  onPurchaseSuccess?: () => void;
 };
 
-export default function LotteryModal({ item, onClose }: Props) {
-  const isUnavailable = !item.available;
+export default function LotteryModal({ item, onClose ,userEmail,onPurchaseSuccess}: Props) {
+  const isUnavailable = item.available <= 0;
 
-  const handlePurchase = () => {
-    // Simulate purchase logic
-    console.log('Purchased:', item.numbers);
+  const handlePurchase = async () => {
+  const res = await fetch('/api/lottery', {
+    method: 'POST',
+    body: JSON.stringify({
+      userId: userEmail,                // passed down from parent
+      lotteryNo: item.numbers.join('-'),// use item.numbers
+      amount: 1,
+    }),
+    headers: { 'Content-Type': 'application/json' },
+  });
 
-    // Auto-close after short delay
+  const result = await res.json();
+  if (result.success) {
+    onClose(); // close modal
+    onPurchaseSuccess?.(); // tell parent to refresh My Lottery
+  } else {
+    alert(result.error || 'Purchase failed');
+  }
+  //Auto-close after short delay
     setTimeout(() => {
       onClose();
     }, 500);
-  };
+};
+
 
   return (
     <div className='fixed inset-0 flex items-center justify-center bg-[#00000099] bg-opacity-50 z-50'>

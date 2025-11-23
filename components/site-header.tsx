@@ -15,6 +15,7 @@ export function SiteHeader() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,6 +49,44 @@ export function SiteHeader() {
       sub.subscription.unsubscribe();
     };
   }, [supabase]);
+
+    useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData?.user;
+        if (!user) return;
+
+        const { data: existingRow, error: fetchError } = await supabase
+          .from('point')
+          .select('points')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (fetchError) throw fetchError;
+
+        if (!existingRow) {
+          const { data: newRow, error: insertError } = await supabase
+            .from('point')
+            .insert({ id: user.id, points: 1000 })
+            .select()
+            .maybeSingle();
+
+          if (insertError) throw insertError;
+
+          setBalance(newRow?.points ?? 1000);
+        } else {
+          setBalance(existingRow.points ?? 1000);
+        }
+      } catch (err) {
+        console.error('Error fetching balance:', err);
+        setBalance(1000);
+      }
+    };
+
+    fetchBalance();
+  }, [supabase]);
+
 
   return (
     <>
@@ -92,7 +131,7 @@ export function SiteHeader() {
                 className='bg-[#4C3519] border-[#67533C] text-white rounded-lg px-4 py-2 h-10 flex items-center gap-2'
               >
                 <Coins className='h-4 w-4 text-[#F5A524]' />
-                <span className='font-semibold tracking-wider'>888,888</span>
+                {balance !== null ? balance.toLocaleString() : 'Loading...'}
               </Button>
               {/* Deposit button */}
               <Link href='/deposit'>

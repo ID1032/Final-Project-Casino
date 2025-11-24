@@ -50,43 +50,65 @@ export function SiteHeader() {
     };
   }, [supabase]);
 
-    useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        const user = userData?.user;
-        if (!user) return;
+useEffect(() => {
+  const fetchBalance = async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData?.user;
+      if (!user) return;
 
-        const { data: existingRow, error: fetchError } = await supabase
+      console.log('🔍 Checking existing point row for user:', user.id);
+
+      const { data: existingRow, error: fetchError } = await supabase
+        .from('point')
+        .select('points')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      console.log('📌 Existing row:', existingRow);
+      if (fetchError) {
+        console.error('❌ Fetch error:', fetchError);
+        throw fetchError;
+      }
+
+      // -------------------------------
+      // CASE 1: No Existing Value Row
+      // -------------------------------
+      if (!existingRow) {
+        console.log('🟡 No point row found — inserting new row...');
+
+        const { data: newRow, error: insertError } = await supabase
           .from('point')
-          .select('points')
-          .eq('id', user.id)
+          .insert({ id: user.id, points: 1000 })
+          .select()
           .maybeSingle();
 
-        if (fetchError) throw fetchError;
+        console.log('🟢 Insert result:', newRow);
 
-        if (!existingRow) {
-          const { data: newRow, error: insertError } = await supabase
-            .from('point')
-            .insert({ id: user.id, points: 1000 })
-            .select()
-            .maybeSingle();
-
-          if (insertError) throw insertError;
-
-          setBalance(newRow?.points ?? 1000);
-        } else {
-          setBalance(existingRow.points ?? 1000);
+        if (insertError) {
+          console.error('❌ Insert error:', insertError);
+          throw insertError;
         }
-      } catch (err) {
-        console.error('Error fetching balance:', err);
-        setBalance(1000);
+
+        setBalance(newRow?.points ?? 1000);
+      } else {
+        // -------------------------------
+        // CASE 2: Existing Value Row
+        // -------------------------------
+        console.log(
+          '🟢 Row exists — using existing points:',
+          existingRow.points
+        );
+        setBalance(existingRow.points ?? 1000);
       }
-    };
+    } catch (err) {
+      console.error('🔥 Final catch — something went wrong:', err);
+      setBalance(1000);
+    }
+  };
 
-    fetchBalance();
-  }, [supabase]);
-
+  fetchBalance();
+}, [supabase]);
 
   return (
     <>

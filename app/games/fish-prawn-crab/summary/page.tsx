@@ -6,6 +6,7 @@ import DiceResultModal from '@/components/ui/dice-result';
 import Modal from '@/components/ui/rules';
 import { Random_Dice } from '@/app/games/fish-prawn-crab/Random_Dice';
 import { createClient } from '@/lib/supabase/client';
+import { Weight_IF_WIN, Weight_FOR_BET } from './Config_fish';
 
 export default function Summary() {
   const router = useRouter();
@@ -81,7 +82,6 @@ export default function Summary() {
         } else {
           setUserPoints(pointRow.points ?? 1000);
         }
-
       } catch (err) {
         console.error('Error fetching user points:', err);
         setUserPoints(1000);
@@ -119,10 +119,7 @@ export default function Summary() {
     }));
   }, [animals, diceIndexes]);
 
-
   // --- debug console: show parsed/normalized/dice/summary ---
-
-
 
   // --- update points using matches (1->1x, 2->2x, 3->3x) ---
   const [individualResults, setIndividualResults] = useState<
@@ -135,7 +132,11 @@ export default function Summary() {
       const bet = normalizedBets[idx] ?? 0;
       const matches = item.points ?? 0;
       const points =
-        bet > 0 ? (matches === 0 ? -bet * 5 : bet * matches * 5) : 0;
+        bet > 0
+          ? matches === 0
+            ? bet * Weight_FOR_BET
+            : bet * matches * Weight_IF_WIN
+          : 0;
       return { label: item.label, bet, matches, points };
     });
 
@@ -158,7 +159,6 @@ export default function Summary() {
     // อัปเดต state ให้ JSX ใช้งาน
     setIndividualResults(results);
   };
-
 
   return (
     <>

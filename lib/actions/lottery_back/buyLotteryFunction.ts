@@ -85,9 +85,10 @@ export async function buyLottery(
       status: 'active',
     };
 
-    const { error: ticketError } = await supabase
+    const { data:insertedTickets,error: ticketError } = await supabase
       .from('User_Lottery')
-      .insert([ticket]);
+      .insert([ticket])
+      .select();
 
     if (ticketError) {
       // If ticket creation fails, attempt to refund points

@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
@@ -21,6 +22,7 @@ import MyLotteryView, {
 } from '@/app/lottery/components/mylotteryview';
 
 import { useAuth } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/client';
 
 
 export default function LotteryPage() {
@@ -71,28 +73,35 @@ export default function LotteryPage() {
     }
   }, [user]);
 
-  fetch('/api/[lottery]')
-  .then(res => (res.ok ? res.json() : Promise.reject(res)))
-  .then(data => {
-    const formatted: LotteryItem[] = data.map(
-      (row: LotteryApiRow, i: number) => {
-        const numbers = row.lotteryNo
-          ? row.lotteryNo.split('-').map(Number)
-          : [];
-        return {
-          id: i + 1,
-          numbers,
-          available: row.remain ?? row.available ?? 0,
-        };
+useEffect(() => {
+  const supabase = createClient();
+
+  const fetchLotteryData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('Lottery_Remaining')
+        .select('id, lotteryNo, remain');
+
+      if (error) throw error;
+
+      const formatted: LotteryItem[] = (data ?? []).map((row, i) => ({
+        id: row.id ?? i + 1,
+        numbers: row.lotteryNo?.split('-').map(Number) ?? [],
+        available: row.remain ?? 0,
+      }));
+
+      setLotteryData(formatted);
+    } catch (err) {
+        if (err instanceof Error) {
+          console.error('Supabase fetch failed:', err.message);
+        } else {
+          console.error('Supabase fetch failed:', String(err));
+        }
       }
-    );
+  };
 
-    setLotteryData(formatted);
-  })
-  .catch(err =>
-    console.error('Failed to refresh lottery data:', err)
-  );
-
+  fetchLotteryData();
+}, []);
 
   const handleAwardClick = () => {
     setAwardNumbers(generateAwardNumbers());

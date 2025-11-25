@@ -1,6 +1,6 @@
 'use client';
 
-import { LotteryItem } from '@/app/lottery/components/data';
+import { LotteryItem } from '@/app/lottery/components/grid';
 
 type Props = {
   item: LotteryItem;
@@ -25,15 +25,15 @@ export default function LotteryModal({ item, onClose ,userEmail,onPurchaseSucces
 
   const result = await res.json();
   if (result.success) {
-    onClose(); // close modal
-    onPurchaseSuccess?.(); // tell parent to refresh My Lottery
-  } else {
-    alert(result.error || 'Purchase failed');
-  }
-  //Auto-close after short delay
-    setTimeout(() => {
-      onClose();
-    }, 500);
+  onPurchaseSuccess?.(); // refresh My Lottery
+  setTimeout(() => {
+    onClose(); // close modal after short delay
+  }, 500);
+} else {
+  console.error('Purchase failed:', result); // helpful for debugging
+  alert(result.message || result.error || 'Purchase failed');
+}
+
 };
 
 

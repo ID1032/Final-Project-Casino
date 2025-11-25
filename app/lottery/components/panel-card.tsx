@@ -1,6 +1,6 @@
 'use client';
 
-import { LotteryItem } from '@/app/lottery/components/data';
+import type { LotteryItem } from '@/app/lottery/components/grid';
 type Props = {
   data: LotteryItem;
   onClick?: () => void;
@@ -10,9 +10,8 @@ export default function LotteryPanel({ data, onClick }: Props) {
   const isUnavailable = data == null || !data.available;
 
   return (
-    
     <div
-      className='relative z-10 flex flex-col space-y-2 rounded-xl items-center justify-center mx-auto w-fit '
+      className='relative z-10 flex flex-col space-y-2 rounded-xl items-center justify-center mx-auto h-auto w-full max-w-[300px] '
       onClick={!isUnavailable ? onClick : undefined}
     >
       {/*Lotter number panel*/}
@@ -70,7 +69,7 @@ export default function LotteryPanel({ data, onClick }: Props) {
               data.numbers.map((num, idx) => (
                 <div
                   key={idx}
-                  className='flex items-center justify-center bg-gradient-to-b from-gray-300 via-white to-gray-300 border border-black text-black font-bold rounded-full w-[45px] h-[45px] shadow-md'
+                  className='flex flex-col items-center justify-center bg-gradient-to-b from-[#D2C7BD] via-white to-[#D2C7BD] border-4 border-[#FFC548] text-[#DA7814] font-extrabold text-3xl rounded-xl w-[60px] h-[60px] shadow-[0_0_10px_rgba(255,215,0,0.6)]'
                 >
                   {num}
                 </div>

@@ -2,7 +2,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ProcessResult } from '.';
-import { MAX_TICKETS_PER_NUMBER } from '.';
+import { MAX_TICKETS_PER_NUMBER } from '@/lib/constants/lottery';
 
 export async function restoreRemainingTickets(
   supabase: SupabaseClient

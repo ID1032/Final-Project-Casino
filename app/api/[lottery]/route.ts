@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
         .order('buyDate', { ascending: false });
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        const message = error?.message ?? 'Unknown error';
+        return NextResponse.json({ error: message }, { status: 400 });
       }
       return NextResponse.json(data);
     }
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       const lotteryNo = searchParams.get('lotteryNo')!;
       const { data, error } = await supabase
         .from('Lottery_Remaining')
-        .select('*')
+        .select('')
         .eq('lotteryNo', lotteryNo)
         .single();
 
@@ -60,11 +61,23 @@ export async function GET(request: NextRequest) {
       { error: 'Missing required query parameters' },
       { status: 400 }
     );
+  const { data, error } = await supabase
+    .from('Lottery_Remaining')
+    .select('lotteryNo, remain');
+
+  if (error) {
+    const message = error?.message ?? 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  return NextResponse.json(data);
+    return NextResponse.json(data);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
+  
 }
 
 // POST: Buy lottery ticket or process lottery round
@@ -165,6 +178,7 @@ export async function PUT(request: NextRequest) {
       error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
+
 }
 
 // DELETE: Not implemented - use PUT with status 'cancelled' instead

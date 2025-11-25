@@ -1,16 +1,27 @@
 'use server';
 
 // Constants
-export const PRIZE_AMOUNT_1 = 10000;
-export const PRIZE_AMOUNT_2 = 5000;
-export const PRIZE_AMOUNT_3 = 2000;
-export const LOTTERY_PRICE = 100;
-export const MAX_TICKETS_PER_NUMBER = 50;
+import {
+  PRIZE_AMOUNT_1,
+  PRIZE_AMOUNT_2,
+  PRIZE_AMOUNT_3,
+  LOTTERY_PRICE
+} from "@/lib/constants/lottery";
+
+export async function getPrizeAmount(rank: number) {
+  switch (rank) {
+    case 1: return PRIZE_AMOUNT_1;
+    case 2: return PRIZE_AMOUNT_2;
+    case 3: return PRIZE_AMOUNT_3;
+    default: return 0;
+  }
+}
+
+
+
 
 // Action codes
-export const PURCHASE_LOTTERY = 'L_BUY';
-export const WIN_LOTTERY = 'L_WIN';
-export const REFUND_LOTTERY = 'L_REFUND';
+
 
 // Types
 export interface WinningNumber {

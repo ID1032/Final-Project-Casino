@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { UserLottery } from '.';
 import { UserPoint } from '.';
 import { ProcessResult } from '.';
-import { LOTTERY_PRICE, PURCHASE_LOTTERY, REFUND_LOTTERY } from '.';
+import { LOTTERY_PRICE, PURCHASE_LOTTERY, REFUND_LOTTERY } from '@/lib/constants/lottery';
 import { deductUserPoints } from './deductPointsFunction';
 
 export async function buyLottery(

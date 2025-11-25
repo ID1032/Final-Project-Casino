@@ -22,6 +22,7 @@ import MyLotteryView, {
 
 import { useAuth } from '@/lib/auth';
 
+
 export default function LotteryPage() {
   const [query, setQuery] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
@@ -63,12 +64,35 @@ export default function LotteryPage() {
       // Fetch user lottery tickets
       fetch(`/api/lottery?userEmail=${user.email}`)
         .then(res => res.json())
-        .then((data: LotteryTicket[])=> {
+        .then((data: LotteryTicket[]) => {
           setLotteries(data);
         })
         .catch(err => console.error('Lottery fetch failed:', err));
     }
   }, [user]);
+
+  fetch('/api/[lottery]')
+  .then(res => (res.ok ? res.json() : Promise.reject(res)))
+  .then(data => {
+    const formatted: LotteryItem[] = data.map(
+      (row: LotteryApiRow, i: number) => {
+        const numbers = row.lotteryNo
+          ? row.lotteryNo.split('-').map(Number)
+          : [];
+        return {
+          id: i + 1,
+          numbers,
+          available: row.remain ?? row.available ?? 0,
+        };
+      }
+    );
+
+    setLotteryData(formatted);
+  })
+  .catch(err =>
+    console.error('Failed to refresh lottery data:', err)
+  );
+
 
   const handleAwardClick = () => {
     setAwardNumbers(generateAwardNumbers());
@@ -80,20 +104,6 @@ export default function LotteryPage() {
     setSelectedItem(item);
     setShowModal(true);
   };
-
-  useEffect(() => {
-    fetch('/api/[lottery]')
-      .then(res => res.json())
-      .then((data: LotteryApiRow[]) => {
-        const formatted = data.map((row, i: number) => ({
-          id: i + 1,
-          numbers: row.lotteryNo.split('-').map(Number),
-          available: row.remain ?? row.available ?? 0,
-        }));
-        setLotteryData(formatted);
-      })
-      .catch(err => console.error('Failed to fetch lottery data:', err));
-}, []);
 
   return (
     <MenuProvider>
@@ -222,7 +232,7 @@ export default function LotteryPage() {
             }
 
             // 🔄 Re-fetch lottery numbers to update availability
-            fetch('/api/lottery/all')
+            fetch('/api/[lottery]')
               .then(res => (res.ok ? res.json() : Promise.reject(res)))
               .then(data => {
                 const formatted: LotteryItem[] = data.map(

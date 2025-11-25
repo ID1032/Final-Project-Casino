@@ -19,7 +19,7 @@ export function SiteHeader({ onSearch }: Props) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
-  const [coins] = useState<number>(0);
+  const [userPoints, setUserPoints] = useState<number | null>(null);
   const [input, setInput] = useState('');
 
   useEffect(() => {
@@ -59,6 +59,41 @@ export function SiteHeader({ onSearch }: Props) {
     e.preventDefault();
     onSearch(input.trim());
   };
+
+  useEffect(() => {
+    const fetchPoints = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData?.user;
+        if (!user) return;
+
+        const { data: pointRow, error } = await supabase
+          .from('point')
+          .select('points')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (!pointRow) {
+          const { data: newRow } = await supabase
+            .from('point')
+            .insert({ id: user.id, points: 1000 })
+            .select()
+            .maybeSingle();
+          setUserPoints(newRow?.points ?? 1000);
+        } else {
+          setUserPoints(pointRow.points ?? 1000);
+        }
+
+      } catch (err) {
+        console.error('Error fetching user points:', err);
+        setUserPoints(1000);
+      }
+    };
+
+    fetchPoints();
+  }, [supabase]);
 
   return (
     <>
@@ -110,7 +145,7 @@ export function SiteHeader({ onSearch }: Props) {
                 className='bg-[#4C3519] border-[#67533C] text-white rounded-lg px-4 py-2 h-10 flex items-center gap-2'
               >
                 <Coins className='h-4 w-4 text-[#F5A524]' />
-                <span className='font-semibold tracking-wider'>{coins}</span>
+                <span className='font-semibold tracking-wider'>{userPoints}</span>
               </Button>
               {/* Deposit button */}
               <Link href='/deposit'>

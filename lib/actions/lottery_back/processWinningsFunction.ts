@@ -1,9 +1,17 @@
 'use server';
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PRIZE_AMOUNT_1, PRIZE_AMOUNT_2, PRIZE_AMOUNT_3, WIN_LOTTERY } from '.';
+import {
+  PRIZE_AMOUNT_1,
+  PRIZE_AMOUNT_2,
+  PRIZE_AMOUNT_3,
+  WIN_LOTTERY
+} from '@/lib/constants/lottery';
 import { WinningNumber, WinningTicket } from '.';
 import { addPointsToUser } from './addPointsFunction';
+import { calculateWinnings, WINNING_CODES } from "@/lib/utils/winningsHelpers";
+
+
 
 export async function processWinnings(
   supabase: SupabaseClient,

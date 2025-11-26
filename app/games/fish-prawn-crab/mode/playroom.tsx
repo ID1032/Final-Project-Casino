@@ -168,6 +168,13 @@ export default function PlayRoom() {
       return false;
     }
 
+    const remaining = available - newTotalPoints;
+
+    if (remaining === 0) {
+      const confirmMsg = 'Are you sure you want to place all points as your bet?';
+      if (!window.confirm(confirmMsg)) return false;
+    }
+
     setBets(prev => {
       const next = [...prev];
       next[idx] = value;

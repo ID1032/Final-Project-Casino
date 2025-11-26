@@ -107,7 +107,7 @@ export default function Summary() {
       return animals.map(label => ({ label, points: 0 }));
     }
 
-    // นับ matches เอง
+    // Count matches
     const matches = Array(animals.length).fill(0);
     diceIndexes.forEach(idx => {
       if (idx >= 0 && idx < matches.length) matches[idx] += 1;
@@ -154,7 +154,6 @@ export default function Summary() {
       console.error(err);
     }
 
-    // อัปเดต state ให้ JSX ใช้งาน
     setIndividualResults(results);
   };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { Card, CardContent } from '../../../../components/ui/card';
@@ -23,6 +24,7 @@ import { useState, useEffect } from 'react';
 import Coin from '../image/Coin.svg';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import {Weight_IF_WIN, INITIAL_POINTS} from '@/app/games/fish-prawn-crab/summary/Config_fish';
 
 interface Items {
   id: number;
@@ -102,7 +104,6 @@ export default function PlayRoom() {
   const items = [...itemsU, ...itemsB];
   const [bets, setBets] = useState<number[]>(() => Array(items.length).fill(0));
 
-  // fetch balance จาก Supabase
   useEffect(() => {
     const fetchBalance = async () => {
       try {
@@ -110,7 +111,6 @@ export default function PlayRoom() {
         const user = userData?.user;
         if (!user) return;
 
-        // ตรวจสอบ row ใน table point
         const { data: existingRow, error: fetchError } = await supabase
           .from('point')
           .select('points')
@@ -120,22 +120,21 @@ export default function PlayRoom() {
         if (fetchError) throw fetchError;
 
         if (!existingRow) {
-          // สร้าง row ใหม่ถ้าไม่มี
           const { data: newRow, error: insertError } = await supabase
             .from('point')
-            .insert({ id: user.id, points: 1000 })
+            .insert({ id: user.id, points: INITIAL_POINTS })
             .select()
             .maybeSingle();
 
           if (insertError) throw insertError;
 
-          setBalance(newRow?.points ?? 1000);
+          setBalance(newRow?.points ?? INITIAL_POINTS);
         } else {
           setBalance(existingRow.points);
         }
-      } catch (err) {
-        // console.error('Error fetching balance:', err);
-        setBalance(1000);
+      } catch (error) {
+        // console.log(error);
+        setBalance(INITIAL_POINTS);
       }
     };
 
@@ -145,14 +144,29 @@ export default function PlayRoom() {
   const handleSelect = (item: any) => {
     setSelected(item);
     const idx = items.findIndex(i => i.id === item.id);
-    setPendingBet(bets[idx] || 0); // เริ่มจาก bet ปัจจุบัน
+    setPendingBet(bets[idx] || 0);
     setOpen(true);
   };
 
-  const handleConfirm = (value: number) => {
-    if (!selected) return;
+  const handleConfirm = (value: number): boolean => {
+    if (!selected) return false;
+
     const idx = items.findIndex(i => i.id === selected.id);
-    if (idx === -1) return;
+    if (idx === -1) return false;
+
+    const newBetPoints = value * Weight_IF_WIN;
+    const prevBetPoints = (bets[idx] ?? 0) * Weight_IF_WIN;
+
+    const currentTotalPoints = bets.reduce(
+      (sum, b) => sum + b * Weight_IF_WIN,
+      0
+    );
+    const newTotalPoints = currentTotalPoints - prevBetPoints + newBetPoints;
+
+    const available = typeof balance === 'number' ? balance : 0;
+    if (newTotalPoints > available) {
+      return false;
+    }
 
     setBets(prev => {
       const next = [...prev];
@@ -161,6 +175,7 @@ export default function PlayRoom() {
     });
 
     setOpen(false);
+    return true;
   };
 
   const handleConfirmAll = (e: React.MouseEvent<HTMLButtonElement>) => {

@@ -6,7 +6,7 @@ import DiceResultModal from '@/components/ui/dice-result';
 import Modal from '@/components/ui/rules';
 import { Random_Dice } from '@/app/games/fish-prawn-crab/Random_Dice';
 import { createClient } from '@/lib/supabase/client';
-import { Weight_IF_WIN, Weight_FOR_BET } from './Config_fish';
+import { Weight_IF_WIN, Weight_FOR_BET, INITIAL_POINTS } from './Config_fish';
 
 export default function Summary() {
   const router = useRouter();
@@ -75,16 +75,16 @@ export default function Summary() {
         if (!pointRow) {
           const { data: newRow } = await supabase
             .from('point')
-            .insert({ id: user.id, points: 1000 })
+            .insert({ id: user.id, points: INITIAL_POINTS })
             .select()
             .maybeSingle();
-          setUserPoints(newRow?.points ?? 1000);
+          setUserPoints(newRow?.points ?? INITIAL_POINTS);
         } else {
-          setUserPoints(pointRow.points ?? 1000);
+          setUserPoints(pointRow.points ?? INITIAL_POINTS);
         }
       } catch (err) {
         console.error('Error fetching user points:', err);
-        setUserPoints(1000);
+        setUserPoints(INITIAL_POINTS);
       }
     };
 
@@ -115,11 +115,9 @@ export default function Summary() {
 
     return animals.map((label, index) => ({
       label,
-      points: matches[index], // 0..3 ตามลูกเต๋าที่ตรง
+      points: matches[index],
     }));
   }, [animals, diceIndexes]);
-
-  // --- debug console: show parsed/normalized/dice/summary ---
 
   // --- update points using matches (1->1x, 2->2x, 3->3x) ---
   const [individualResults, setIndividualResults] = useState<

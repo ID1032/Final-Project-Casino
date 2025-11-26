@@ -1,4 +1,8 @@
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+
 import AnimatedDigit from '@/app/lottery/components/animateDigit';
+
 
 function DigitPanel({
   digits,
@@ -61,7 +65,6 @@ function DigitPanel({
 }
 
 export default function AwardView({
-  numbers,
   onBack,
   onHistory,
 }: {
@@ -69,6 +72,61 @@ export default function AwardView({
   onBack: () => void;
   onHistory: () => void;
 }) {
+  const [numbers, setNumbers] = useState<number[][]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchOrGenerateAward = async () => {
+      const today = new Date();
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(today.getDate() - 7);
+
+      // Get latest award
+      const { data, error } = await supabase
+        .from("Lottery_WinNo")
+        .select("*")
+        .order("date", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error("Error fetching award:", error);
+      }
+
+        // If exists and within 7 days → reuse
+      if (data && new Date(data.date).getTime() >= oneWeekAgo.getTime()) {
+        // Reuse existing award
+        setNumbers([
+          String(data.firstPrize).split("").map(Number),
+          String(data.secondPrize).split("").map(Number),
+          String(data.thirdPrize).split("").map(Number),
+        ]);
+      } else {
+        // Generate new award
+        const newAward = [
+          Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)),
+          Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)),
+          Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)),
+        ];
+
+        await supabase.from("Lottery_WinNo").insert([
+          {
+            date: today.toISOString().split("T")[0],
+            firstPrize: parseInt(newAward[0].join("")),
+            secondPrize: parseInt(newAward[1].join("")),
+            thirdPrize: parseInt(newAward[2].join("")),
+          },
+        ]);
+
+        setNumbers(newAward);
+      }
+    };
+
+    fetchOrGenerateAward();
+  }, []);
+
+  if (!numbers.length) return <div>Loading...</div>;
+
   return (
     <div className='flex flex-col items-center gap-6 py-6 text-white'>
       <div className='text-3xl font-bold text-yellow-400'>🎉 JACKPOT 🎉</div>

@@ -145,10 +145,12 @@ export function SiteHeader({ onSearch }: Props) {
                 className='bg-[#4C3519] border-[#67533C] text-white rounded-lg px-4 py-2 h-10 flex items-center gap-2'
               >
                 <Coins className='h-4 w-4 text-[#F5A524]' />
-                <span className='font-semibold tracking-wider'>{userPoints}</span>
+                <span className='font-semibold tracking-wider'>
+                  {userPoints}
+                </span>
               </Button>
               {/* Deposit button */}
-              <Link href='/deposit'>
+              <Link href={`/TopUp`}>
                 <Button className='bg-[#DA7814] hover:brightness-110 text-white rounded-lg px-5 py-2 h-10 flex items-center gap-2'>
                   <PlusCircle className='h-5 w-5 opacity-90' />
                   <span className='font-semibold'>Deposit</span>
@@ -156,14 +158,11 @@ export function SiteHeader({ onSearch }: Props) {
               </Link>
               <div className='relative h-8 w-8 rounded-full'>
                 <Avatar className='h-8 w-8'>
-                  <AvatarImage
-                    src={avatarUrl || ''}
-                    alt={displayName|| ''}
-                  />
+                  <AvatarImage src={avatarUrl || ''} alt={displayName || ''} />
                   <AvatarFallback className='bg-[#8B4513] text-white'>
                     {displayName?.charAt(0)?.toUpperCase() || (
-                        <User className='h-4 w-4' />
-                      )}
+                      <User className='h-4 w-4' />
+                    )}
                   </AvatarFallback>
                 </Avatar>
               </div>

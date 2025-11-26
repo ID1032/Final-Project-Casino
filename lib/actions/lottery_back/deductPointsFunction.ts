@@ -1,67 +1,48 @@
 'use server';
-
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ProcessResult } from '.';
-import { UserPoint } from '.';
+import { INITIAL_POINTS,LOTTERY_PRICE } from '@/lib/constants/lottery';
 
 export async function deductUserPoints(
   supabase: SupabaseClient,
-  uuid: string,
-  amount: number,
-  detail: string
-): Promise<ProcessResult> {
+  userID: string,
+  amount: number
+): Promise<{ success: boolean; message?: string }> {
   try {
-    /// 1. Get current balance
-    const { data: pointRows, error: fetchError } = await supabase
+    const { data: pointRow, error } = await supabase
       .from('point')
       .select('points')
-      .eq('uuid', uuid);
+      .eq('id', userID)
+      .maybeSingle();
 
-    if (fetchError || !pointRows) {
-      return {
-        success: false,
-        message: 'Failed to fetch point history',
-        error: fetchError,
-      };
+    if (error) throw error;
+
+    let currentPoints = pointRow?.points ?? INITIAL_POINTS;
+
+    if (!pointRow) {
+      const { data: newRow } = await supabase
+        .from('point')
+        .insert({ id: userID, points: INITIAL_POINTS })
+        .select()
+        .maybeSingle();
+      currentPoints = newRow?.points ?? INITIAL_POINTS;
     }
 
-    const currentBalance = pointRows.reduce((sum, row) => sum + row.points, 0);
-
-    if (currentBalance < amount) {
-      return {
-        success: false,
-        message: 'Insufficient points',
-      };
+    if (currentPoints < LOTTERY_PRICE) {
+      return { success: false, message: 'Not enough points' };
     }
 
-    // 2. Insert deduction record
-    const { error: insertError } = await supabase
+    const newPoints = currentPoints - LOTTERY_PRICE;
+
+    const { error: updateError } = await supabase
       .from('point')
-      .insert([
-        {
-          uuid,
-          points: -amount,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      .update({ points: newPoints })
+      .eq('id', userID);
 
-    if (insertError) {
-      return {
-        success: false,
-        message: 'Failed to process payment',
-        error: insertError,
-      };
-    }
+    if (updateError) throw updateError;
 
-    return {
-      success: true,
-      message: `Successfully deducted ${amount} points to user ${uuid}. New balance: ${newPoints}`,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: 'Unexpected error while processing points',
-      error,
-    };
+    return { success: true };
+  } catch (err) {
+    console.error('Deduct error:', err);
+    return { success: false, message: 'Deduction failed' };
   }
 }

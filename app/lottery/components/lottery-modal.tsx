@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import { LotteryItem } from '@/app/lottery/components/grid';
 import { createClient } from '@/lib/supabase/client';
-import { buyLottery } from '../../../lib/actions/lottery_back/buyLotteryFunction';
-import { processWinnings } from '../../../lib/actions/lottery_back/processWinningsFunction';
 
 type Props = {
   item: LotteryItem;
@@ -16,7 +14,6 @@ type Props = {
 export default function LotteryModal({
   item,
   onClose,
-  userEmail,
   onPurchaseSuccess,
 }: Props) {
   const [lotteryData, setLotteryData] = useState<LotteryItem[]>([]);
@@ -49,7 +46,6 @@ export default function LotteryModal({
     try {
       const {
         data: { session },
-        error: sessionError,
       } = await supabase.auth.getSession();
 
       if (!session || !session.user) {

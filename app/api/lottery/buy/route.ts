@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { NextRequest, NextResponse } from 'next/server';
-
+import { deductUserPoints } from '@/lib/actions/lottery_back/deductPointsFunction';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,21 +31,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    {/*
 
-    const pointResult = await deductUserPoints(
-      supabase,
-      userID,
-      amount,
-      `Buy lottery ${lotteryNo}`
-    );
+    const pointResult = await deductUserPoints(supabase, userID, amount);
     if (!pointResult.success) {
       return NextResponse.json(
         { success: false, error: pointResult.message },
         { status: 400 }
       );
     }
-      */}
 
     const newAvailable = remaining.remain - 1;
 
@@ -84,20 +77,31 @@ export async function POST(request: NextRequest) {
         .from('Lottery_Remaining')
         .update({ remain: remaining.remain }) // restore old value
         .eq('lotteryNo', lotteryNo);
-      {/* 
-      await supabase
-        .from('point')
-        .insert([
-          {
-            uuid: userID,
-            points: -amount,
-            create_at: new Date().toISOString(),
-          },
-        ]);
-      */}
+
+      await supabase.from('point').insert([
+        {
+          uuid: userID,
+          points: -amount,
+          create_at: new Date().toISOString(),
+        },
+      ]);
+
+      console.log('🧾 Insert payload:', {
+        uID: userID,
+        lotteryNo,
+        amount,
+        status: status || 'active',
+        buyDate: buyDate || new Date().toISOString(),
+        drawDate: drawDate || new Date().toISOString(),
+      });
 
       return NextResponse.json(
-        { success: false, error: 'Ticket creation failed' },
+        {
+          success: false,
+          error: insertError.message || 'Ticket creation failed',
+          details: insertError.details || null,
+          hint: insertError.hint || null,
+        },
         { status: 500 }
       );
     }

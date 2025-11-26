@@ -9,8 +9,6 @@ import {
 } from '@/lib/constants/lottery';
 import { WinningNumber, WinningTicket } from '.';
 import { addPointsToUser } from './addPointsFunction';
-import { calculateWinnings, WINNING_CODES } from "@/lib/utils/winningsHelpers";
-
 
 
 export async function processWinnings(

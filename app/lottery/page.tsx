@@ -34,20 +34,15 @@ export default function LotteryPage() {
 
   const filtered = filterLotteryData(lotteryData, query);
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
-  const paginatedItems = filtered.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   const [showAwardView, setShowAwardView] = useState(false);
   const [awardNumbers, setAwardNumbers] = useState<number[][]>([]);
   const [showHistoryDraw, setShowHistoryDraw] = useState(false);
 
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [lotteries, setLotteries] = useState<LotteryTicket[]>([]);
   const [showMyLottery, setShowMyLottery] = useState(false);
 
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [, setProfile] = useState<UserProfile | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<LotteryItem | null>(null);
@@ -112,6 +107,7 @@ export default function LotteryPage() {
     setSelectedItem(item);
     setShowModal(true);
   };
+  
 
   return (
     <MenuProvider>

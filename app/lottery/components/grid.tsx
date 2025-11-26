@@ -17,7 +17,7 @@ type Props = {
 
 export default function LotteriesGrid({ items,pageKey,onCardClick }: Props) {
   //console.log('LotteriesGrid items:', items);
-  const [selectedItem, setSelectedItem] = useState<LotteryItem | null>(null);
+  const [, setSelectedItem] = useState<LotteryItem | null>(null);
 
   return (
     <div key={pageKey} className='relative'>

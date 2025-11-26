@@ -28,7 +28,6 @@ export default function MyLotteryView({onBack}:MyLotteryViewProps) {
     const fetchTickets = async () => {
       const {
         data: { user },
-        error: authError,
       } = await supabase.auth.getUser();
 
       if (!user) {

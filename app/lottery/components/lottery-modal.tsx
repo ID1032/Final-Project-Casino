@@ -1,6 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { LotteryItem } from '@/app/lottery/components/grid';
+import { createClient } from '@/lib/supabase/client';
+import { buyLottery } from '../../../lib/actions/lottery_back/buyLotteryFunction';
+import { processWinnings } from '../../../lib/actions/lottery_back/processWinningsFunction';
 
 type Props = {
   item: LotteryItem;
@@ -9,34 +13,79 @@ type Props = {
   onPurchaseSuccess?: () => void;
 };
 
-export default function LotteryModal({ item, onClose ,userEmail,onPurchaseSuccess}: Props) {
+export default function LotteryModal({
+  item,
+  onClose,
+  userEmail,
+  onPurchaseSuccess,
+}: Props) {
+  const [lotteryData, setLotteryData] = useState<LotteryItem[]>([]);
+
+  const supabase = createClient();
   const isUnavailable = item.available <= 0;
 
+  const refreshLotteryData = async () => {
+    try {
+      const res = await fetch('/api/lottery/remaining');
+      const result = await res.json();
+      if (result.success) {
+        setLotteryData(result.data); // ✅ consistent
+      } else {
+        console.error(result.error);
+      }
+    } catch (err) {
+      console.error('Failed to refresh lottery data:', err);
+      if (err instanceof Error) {
+        console.error('Stack trace:', err.stack);
+      }
+    }
+  };
+
+  useEffect(() => {
+    refreshLotteryData();
+  }, []);
+
   const handlePurchase = async () => {
-  const res = await fetch('/api/lottery', {
-    method: 'POST',
-    body: JSON.stringify({
-      userId: userEmail,                // passed down from parent
-      lotteryNo: item.numbers.join('-'),// use item.numbers
-      amount: 1,
-    }),
-    headers: { 'Content-Type': 'application/json' },
-  });
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-  const result = await res.json();
-  if (result.success) {
-  onPurchaseSuccess?.(); // refresh My Lottery
-  setTimeout(() => {
-    onClose(); // close modal after short delay
-  }, 500);
+      if (!session || !session.user) {
+        console.error('User not found');
+        return;
+      }
+
+      const response = await fetch('/api/lottery/buy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userID: session.user.id, // ✅ matches backend
+          lotteryNo: item.numbers.join('-'),
+          amount: 1,
+          buyDate: new Date().toISOString(),
+          drawDate: new Date().toISOString(), // ✅ required by DB
+          status: 'purchased',
+        }),
+      });
+
+      await new Promise(r => setTimeout(r, 300));
+
+      const result = await response.json();
+      if (result.success) {
+  await refreshLotteryData();
+  onClose();
+  onPurchaseSuccess?.();
 } else {
-  console.error('Purchase failed:', result); // helpful for debugging
-  alert(result.message || result.error || 'Purchase failed');
+  alert(result.error || 'Purchase failed');
 }
-
-};
-
-
+    } catch (err) {
+      console.error('Purchase error:', err);
+    }
+  };
   return (
     <div className='fixed inset-0 flex items-center justify-center bg-[#00000099] bg-opacity-50 z-50'>
       <div className='relative bg-gradient-to-b from-[#EE9F3D] to-[#FFFFFF] rounded-xl p-15 w-[1140px] h-[612px] shadow-2xl border-4 border-[#FFC548] text-[#DA7814]'>

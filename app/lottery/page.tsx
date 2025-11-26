@@ -24,7 +24,6 @@ import MyLotteryView, {
 import { useAuth } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/client';
 
-
 export default function LotteryPage() {
   const [query, setQuery] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
@@ -56,7 +55,7 @@ export default function LotteryPage() {
   useEffect(() => {
     if (user?.email) {
       // Fetch profile
-      fetch(`/api/lottery?profileEmail=${user.email}`)
+      fetch(`/api/lottery/remaining?profileEmail=${user.email}`)
         .then(res => (res.ok ? res.json() : Promise.reject(res)))
         .then((data: UserProfile) => {
           setProfile(data);
@@ -64,7 +63,7 @@ export default function LotteryPage() {
         .catch(err => console.error('Profile fetch failed:', err));
 
       // Fetch user lottery tickets
-      fetch(`/api/lottery?userEmail=${user.email}`)
+      fetch(`/api/lottery/remaining?userEmail=${user.email}`)
         .then(res => res.json())
         .then((data: LotteryTicket[]) => {
           setLotteries(data);
@@ -73,35 +72,35 @@ export default function LotteryPage() {
     }
   }, [user]);
 
-useEffect(() => {
-  const supabase = createClient();
+  useEffect(() => {
+    const supabase = createClient();
 
-  const fetchLotteryData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('Lottery_Remaining')
-        .select('id, lotteryNo, remain');
+    const fetchLotteryData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('Lottery_Remaining')
+          .select('id, lotteryNo, remain');
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const formatted: LotteryItem[] = (data ?? []).map((row, i) => ({
-        id: row.id ?? i + 1,
-        numbers: row.lotteryNo?.split('-').map(Number) ?? [],
-        available: row.remain ?? 0,
-      }));
+        const formatted: LotteryItem[] = (data ?? []).map((row, i) => ({
+          id: row.id ?? i + 1,
+          numbers: row.lotteryNo?.split('-').map(Number) ?? [],
+          available: row.remain ?? 0,
+        }));
 
-      setLotteryData(formatted);
-    } catch (err) {
+        setLotteryData(formatted);
+      } catch (err) {
         if (err instanceof Error) {
           console.error('Supabase fetch failed:', err.message);
         } else {
           console.error('Supabase fetch failed:', String(err));
         }
       }
-  };
+    };
 
-  fetchLotteryData();
-}, []);
+    fetchLotteryData();
+  }, []);
 
   const handleAwardClick = () => {
     setAwardNumbers(generateAwardNumbers());
@@ -235,33 +234,44 @@ useEffect(() => {
 
             // Re-fetch tickets after purchase
             if (user?.email) {
-              fetch(`/api/lottery?userEmail=${user.email}`)
+              fetch(`/api/lottery/remaining?userEmail=${user.email}`)
                 .then(res => res.json())
                 .then(data => setLotteries(data));
             }
 
             // 🔄 Re-fetch lottery numbers to update availability
-            fetch('/api/[lottery]')
+            fetch('/api/lottery/remaining')
               .then(res => (res.ok ? res.json() : Promise.reject(res)))
               .then(data => {
-                const formatted: LotteryItem[] = data.map(
+                console.log('API response:', data);
+                if (!Array.isArray(data.data)) {
+                  throw new Error(
+                    'Expected array but got: ' + JSON.stringify(data)
+                  );
+                }
+
+                const formatted: LotteryItem[] = data.data.map(
                   (row: LotteryApiRow, i: number) => {
-                    const numbers = row.lotteryNo
-                      ? row.lotteryNo.split('-').map(Number)
-                      : [];
+                    const numbers = row.lotteryNo?.split('-').map(Number) ?? [];
+                    // Avoid 'any' by augmenting the row type locally to include an optional id
+                    const id =
+                      (row as LotteryApiRow & { id?: number }).id ?? i + 1;
                     return {
-                      id: i + 1,
+                      id,
                       numbers,
-                      available: row.remain ?? row.available ?? 0,
+                      available: row.remain ?? 0,
                     };
                   }
                 );
 
                 setLotteryData(formatted);
               })
-              .catch(err =>
-                console.error('Failed to refresh lottery data:', err)
-              );
+              .catch(err => {
+                console.error('Failed to refresh lottery data:', err);
+                if (err instanceof Error) {
+                  console.error('Stack trace:', err.stack);
+                }
+              });
           }}
         />
       )}

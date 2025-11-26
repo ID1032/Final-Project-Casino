@@ -1,10 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { LotteryStatus, ProcessResult } from '@/lib/actions/lottery_back';
-import { buyLottery } from '../../../lib/actions/lottery_back/buyLotteryFunction';
-import { processLottoRound } from '../../../lib/actions/lottery_back/processLottoRound';
+import { LotteryStatus } from '@/lib/actions/lottery_back';
+import { processLottoRound } from '../../../../lib/actions/lottery_back/processLottoRound';
 
 // GET: Fetch lottery info or results
+{/*
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       const lotteryNo = searchParams.get('lotteryNo')!;
       const { data, error } = await supabase
         .from('Lottery_Remaining')
-        .select('')
+        .select('*')
         .eq('lotteryNo', lotteryNo)
         .single();
 
@@ -61,17 +61,7 @@ export async function GET(request: NextRequest) {
       { error: 'Missing required query parameters' },
       { status: 400 }
     );
-  const { data, error } = await supabase
-    .from('Lottery_Remaining')
-    .select('lotteryNo, remain');
-
-  if (error) {
-    const message = error?.message ?? 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
-
-  return NextResponse.json(data);
-    return NextResponse.json(data);
+  
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Internal Server Error';
@@ -79,31 +69,20 @@ export async function GET(request: NextRequest) {
   }
   
 }
+*/}
 
 // POST: Buy lottery ticket or process lottery round
-export async function POST(
+{/*
+  export async function POST(
   request: NextRequest,
   { params }: { params: { lottery: string } }
 ) {
   try {
     const body = await request.json();
-    let result: ProcessResult;
 
-    // Buy lottery ticket
-    if (params.lottery === 'buy') {
-      const { userId, lotteryNo, amount = 1 } = body;
 
-      if (!userId || !lotteryNo) {
-        return NextResponse.json(
-          { error: 'Missing required fields' },
-          { status: 400 }
-        );
-      }
-
-      result = await buyLottery(userId, lotteryNo, amount);
-    }
     // Process lottery round
-    else if (params.lottery === 'draw') {
+    if (params.lottery === 'draw') {
       const { drawDate, forceWinNo = null } = body;
 
       if (!drawDate) {
@@ -113,25 +92,27 @@ export async function POST(
         );
       }
 
-      result = await processLottoRound(drawDate, forceWinNo);
-    } else {
-      return NextResponse.json({ error: 'Invalid operation' }, { status: 400 });
+      const result = await processLottoRound(drawDate, forceWinNo);
+
+      if (!result.success) {
+        return NextResponse.json(
+          { error: result.message, details: result.error },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json(result, { status: 200 });
     }
 
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.message, details: result.error },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({ message: result.message }, { status: 200 });
+    return NextResponse.json({ error: 'Invalid operation' }, { status: 400 });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+  */}
+
 
 // PUT: Update lottery ticket status
 export async function PUT(request: NextRequest) {

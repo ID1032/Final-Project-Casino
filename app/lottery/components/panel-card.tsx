@@ -4,10 +4,11 @@ import type { LotteryItem } from '@/app/lottery/components/grid';
 type Props = {
   data: LotteryItem;
   onClick?: () => void;
+  showAvailable?: boolean;
 };
 
-export default function LotteryPanel({ data, onClick }: Props) {
-  const isUnavailable = data == null || !data.available;
+export default function LotteryPanel({ data, onClick, showAvailable }: Props) {
+  const isUnavailable = showAvailable ? !data || !data.available : false;
 
   return (
     <div
@@ -19,7 +20,13 @@ export default function LotteryPanel({ data, onClick }: Props) {
         <button
           disabled={isUnavailable}
           className={`flex items-center justify-center w-full max-w-[300px] h-full py-6 bg-[#b22222] rounded-md mx-auto font-bold transition
-          ${isUnavailable ? 'opacity-70 cursor-not-allowed' : 'hover:bg-white'}`}
+          ${
+            isUnavailable
+              ? (showAvailable 
+                ? 'opacity-70 cursor-not-allowed'
+                : 'cursor-not-allowed')
+              : 'hover:bg-white'
+          }`}
         >
           {/* Light Bulbs Around Border */}
           <div className='absolute inset-0 pointer-events-none'>
@@ -82,45 +89,20 @@ export default function LotteryPanel({ data, onClick }: Props) {
       </div>
 
       {/*status can buy or not*/}
-      <button>
-        <div
-          className={`rounded-full px-4 py-2 text-white font-bold shadow-md
-    ${
-      data.available > 0
-        ? 'bg-gradient-to-b from-[#FF0000A3] to-[#EE9F3D] hover:bg-white'
-        : 'bg-gradient-to-b from-[#737373B2] to-[#FFFFFF] opacity-70 cursor-not-allowed'
-    }`}
-        >
-          {`${data.available}/5 `}
-        </div>
-      </button>
+      {showAvailable !== false && (
+        <button>
+          <div
+            className={`rounded-full px-4 py-2 text-white font-bold shadow-md
+              ${
+                data.available > 0
+                  ? 'bg-gradient-to-b from-[#FF0000A3] to-[#EE9F3D] hover:bg-white'
+                  : 'bg-gradient-to-b from-[#737373B2] to-[#FFFFFF] opacity-70 cursor-not-allowed'
+              }`}
+          >
+            {`${data.available}/5 `}
+          </div>
+        </button>
+      )}
     </div>
   );
-}
-
-{
-  /*{item.available === 0 && (
-        <div className='flex flex-row gap-4 px-6 py-1 rounded-full bg-gradient-to-b from-[#737373B2] to-[#FFFFFF] text-white font-bold sm:text-sm shadow-md hover:scale-105 transition-transform duration-200'>
-          {item.available}/5
-        </div>
-      )}
-        <div className='flex flex-row gap-4 px-6 py-1 rounded-full bg-gradient-to-b from-[#FF0000A3] to-[#EE9F3D] text-white font-bold sm:text-sm shadow-md hover:scale-105 transition-transform duration-2'>
-        {item.available}/5
-      </div>
-      
-      <div >
-        {/* Number Tiles 
-      {item.numbers.map((num, idx) => {
-        const isZero = num === 0 || isUnavailable
-        return (
-          <div
-            key={idx}
-            className={`flex flex-row gap-4 px-6 py-1 rounded-full bg-gradient-to-b  text-white font-bold text-lg sm:text-xl shadow-md hover:scale-105 transition-transform duration-200'
-              ${isZero ? 'bg-gray-300 text-gray-600' : 'bg-gradient-to-b bg-white text-black'}`}
-          >
-            {item.available}/5
-          </div>
-          )
-      })}
-      </div>*/
 }

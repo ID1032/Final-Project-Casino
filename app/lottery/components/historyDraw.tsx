@@ -1,24 +1,42 @@
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+
+
 type HistoryItem = {
   date: string;
-  jackpot: string;
-  second: string;
-  third: string;
+  firstPrize: number;
+  secondPrize: number;
+  thirdPrize: number;
 };
 
-const mockHistory: HistoryItem[] = [
-  { date: '01/11/2025', jackpot: '325', second: '229', third: '444' },
-  { date: '02/11/2025', jackpot: '789', second: '310', third: '149' },
-  { date: '03/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '04/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '05/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '06/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '07/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '08/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '09/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-  { date: '10/11/2025', jackpot: 'xxx', second: 'xxx', third: 'xxx' },
-];
 
 export default function HistoryDraw({ onBack }: { onBack: () => void }) {
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const { data, error } = await supabase
+        .from('Lottery_WinNo')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching history:', error);
+      } else {
+        const formatted = data.map((item) => ({
+          date: new Date(item.date).toLocaleDateString('en-GB'),
+          firstPrize: item.firstPrize,
+          secondPrize: item.secondPrize,
+          thirdPrize: item.thirdPrize,
+        }));
+        setHistory(formatted);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
   return (
     <div className="flex flex-col items-center gap-6 py-6 px-4 text-white rounded-xl">
       <h2 className="text-3xl font-bold text-yellow-400">📜 History Draw</h2>
@@ -33,12 +51,12 @@ export default function HistoryDraw({ onBack }: { onBack: () => void }) {
           </tr>
         </thead>
         <tbody>
-          {mockHistory.map((item, index) => (
+          {history.map((item, index) => (
             <tr key={index} className="bg-[#3B2A1A] text-white">
               <td className="px-4 py-2 border">{item.date}</td>
-              <td className="px-4 py-2 border">{item.jackpot}</td>
-              <td className="px-4 py-2 border">{item.second}</td>
-              <td className="px-4 py-2 border">{item.third}</td>
+              <td className="px-4 py-2 border">{item.firstPrize}</td>
+              <td className="px-4 py-2 border">{item.secondPrize}</td>
+              <td className="px-4 py-2 border">{item.thirdPrize}</td>
             </tr>
           ))}
         </tbody>

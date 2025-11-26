@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { deductUserPoints } from '../../../../lib/actions/lottery_back/deductPointsFunction';
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    {/*
 
     const pointResult = await deductUserPoints(
       supabase,
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+      */}
 
     const newAvailable = remaining.remain - 1;
 
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
         .from('Lottery_Remaining')
         .update({ remain: remaining.remain }) // restore old value
         .eq('lotteryNo', lotteryNo);
-
+      {/* 
       await supabase
         .from('point')
         .insert([
@@ -92,6 +94,7 @@ export async function POST(request: NextRequest) {
             create_at: new Date().toISOString(),
           },
         ]);
+      */}
 
       return NextResponse.json(
         { success: false, error: 'Ticket creation failed' },

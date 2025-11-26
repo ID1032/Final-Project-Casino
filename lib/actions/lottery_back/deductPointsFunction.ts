@@ -6,69 +6,56 @@ import { UserPoint } from '.';
 
 export async function deductUserPoints(
   supabase: SupabaseClient,
-  uID: number,
+  uuid: string,
   amount: number,
   detail: string
 ): Promise<ProcessResult> {
   try {
-    // 1. First, record the transaction in User_Point
-    const deductPoint: UserPoint = {
-      uID: uID,
-      dateTime: new Date().toISOString(),
-      amount: amount,
-      detail: detail,
-    };
+    /// 1. Get current balance
+    const { data: pointRows, error: fetchError } = await supabase
+      .from('point')
+      .select('points')
+      .eq('uuid', uuid);
 
-    const { error: pointError } = await supabase
-      .from('User_Point')
-      .insert([deductPoint]);
-
-    if (pointError) {
+    if (fetchError || !pointRows) {
       return {
         success: false,
-        message: 'Insufficient points or failed to process payment',
-        error: pointError,
+        message: 'Failed to fetch point history',
+        error: fetchError,
       };
     }
 
-    // 2. Then, update the Customer's total points
-    // First get the current points
-    const { data: customerData, error: customerError } = await supabase
-      .from('Customer')
-      .select('Point')
-      .eq('id', uID)
-      .single();
+    const currentBalance = pointRows.reduce((sum, row) => sum + row.points, 0);
 
-    if (customerError) {
+    if (currentBalance < amount) {
       return {
         success: false,
-        message: 'Failed to fetch customer points',
-        error: customerError,
+        message: 'Insufficient points',
       };
     }
 
-    const currentPoints = customerData?.Point || 0;
-    const newPoints = currentPoints - amount;
+    // 2. Insert deduction record
+    const { error: insertError } = await supabase
+      .from('point')
+      .insert([
+        {
+          uuid,
+          points: -amount,
+          created_at: new Date().toISOString(),
+        },
+      ]);
 
-    // Update the Customer's points
-    const { error: updateError } = await supabase
-      .from('Customer')
-      .update({ Point: newPoints })
-      .eq('id', uID);
-
-    if (updateError) {
-      // If Customer update fails, we should log this but the transaction was already recorded
-      // console.error('Failed to update Customer points:', updateError);
+    if (insertError) {
       return {
         success: false,
-        message: 'Failed to update customer total points',
-        error: updateError,
+        message: 'Failed to process payment',
+        error: insertError,
       };
     }
 
     return {
       success: true,
-      message: `Successfully deducted ${amount} points to user ${uID}. New balance: ${newPoints}`,
+      message: `Successfully deducted ${amount} points to user ${uuid}. New balance: ${newPoints}`,
     };
   } catch (error) {
     return {
